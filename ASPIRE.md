@@ -17,8 +17,10 @@ This project includes .NET Aspire orchestration support for easy running and man
 Before running with Aspire, ensure you have:
 
 1. **.NET 9.0 SDK or later** - [Download here](https://dotnet.microsoft.com/download/dotnet/9.0)
-2. **Node.js 18 or later** - [Download here](https://nodejs.org/)
+2. **Node.js 20.19+ or 22.12+** (required for Vite) - [Download here](https://nodejs.org/)
 3. **Docker Desktop** (optional, for containerization) - [Download here](https://www.docker.com/products/docker-desktop/)
+
+> **Important**: This project uses Vite which requires Node.js 20.19+ or 22.12+. Older versions like Node.js 18 are not supported.
 
 ### Verify Installation
 
@@ -35,24 +37,26 @@ npm --version
 
 ## Installation
 
-### 1. Install .NET Aspire Workload
-
-```bash
-dotnet workload update
-dotnet workload install aspire
-```
-
-### 2. Install Node.js Dependencies
+### 1. Install Node.js Dependencies
 
 ```bash
 npm install
 ```
 
+> **Note**: This project uses .NET Aspire via NuGet packages. No workload installation is required - the Aspire SDK (version 9.2.0) will be automatically downloaded when you restore or run the project.
+
 ## Running the Application with Aspire
 
 ### Quick Start
 
-From the root directory of the project:
+**Recommended: Use helper scripts** (includes Node.js and .NET version checks):
+
+```bash
+./run-aspire.sh    # Linux/macOS
+run-aspire.bat     # Windows
+```
+
+**Or run directly** from the root directory:
 
 ```bash
 cd Skelton.AppHost
@@ -217,12 +221,28 @@ winget install Microsoft.DotNet.SDK.9
 dotnet --version
 ```
 
-### Issue: Aspire Workload Not Installed
+### Issue: Node.js Version Too Old
 
-**Solution**: Install the Aspire workload:
+**Error**: `TypeError: crypto.hash is not a function` or `Vite requires Node.js version 20.19+ or 22.12+`
+
+**Solution**: Upgrade Node.js to version 20.19+ or 22.12+:
 
 ```bash
-dotnet workload install aspire
+# Check current version
+node --version
+
+# Download latest LTS from https://nodejs.org/
+# Recommended: Node.js 20.19+ (LTS) or 22.12+
+
+# Windows - using winget
+winget install OpenJS.NodeJS.LTS
+
+# macOS - using Homebrew
+brew install node@20
+
+# Linux - using nvm
+nvm install 20
+nvm use 20
 ```
 
 ### Issue: Port 5173 Already in Use
