@@ -16,19 +16,8 @@ fi
 # Check .NET version
 DOTNET_VERSION=$(dotnet --version)
 echo "Using .NET SDK version: $DOTNET_VERSION"
-
-# Check if Aspire workload is installed
-if ! dotnet workload list | grep -q "aspire"; then
-    echo ""
-    echo "Warning: Aspire workload may not be installed."
-    echo "To install, run: dotnet workload install aspire"
-    echo ""
-    read -p "Continue anyway? (y/n) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
-    fi
-fi
+echo ""
+echo "Note: This project uses Aspire via NuGet packages (no workload required)"
 
 # Check if node_modules exists
 if [ ! -d "node_modules" ]; then

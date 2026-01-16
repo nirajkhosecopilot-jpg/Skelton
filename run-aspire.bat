@@ -17,17 +17,8 @@ if %ERRORLEVEL% NEQ 0 (
 REM Check .NET version
 for /f "tokens=*" %%i in ('dotnet --version') do set DOTNET_VERSION=%%i
 echo Using .NET SDK version: %DOTNET_VERSION%
-
-REM Check if Aspire workload is installed
-dotnet workload list | findstr /C:"aspire" >nul
-if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo Warning: Aspire workload may not be installed.
-    echo To install, run: dotnet workload install aspire
-    echo.
-    set /p CONTINUE="Continue anyway? (y/n): "
-    if /i not "%CONTINUE%"=="y" exit /b 1
-)
+echo.
+echo Note: This project uses Aspire via NuGet packages (no workload required)
 
 REM Check if node_modules exists
 if not exist "node_modules\" (
