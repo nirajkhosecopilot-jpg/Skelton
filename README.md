@@ -58,11 +58,38 @@ Preview the production build:
 npm run preview
 ```
 
+#### Running with .NET Aspire (Recommended)
+
+For a better development experience with built-in dashboard, monitoring, and orchestration:
+
+**Prerequisites:**
+- .NET 9.0 SDK or later
+- Aspire workload installed: `dotnet workload install aspire`
+
+**Quick Start:**
+```bash
+cd Skelton.AppHost
+dotnet run
+```
+
+This will:
+- Start the Aspire Dashboard at `https://localhost:17219`
+- Automatically launch the React application
+- Provide real-time monitoring, logs, and metrics
+
+**Benefits:**
+- Unified dashboard for monitoring
+- Built-in observability (logging, tracing, metrics)
+- Easy service orchestration
+- Cloud-ready deployment support
+
+For detailed Aspire setup and usage, see [ASPIRE.md](./ASPIRE.md).
+
 ## Application Structure
 
 ```
 Skelton/
-├── src/
+├── src/                                   # React application source
 │   ├── components/
 │   │   ├── ProjectDescriptionForm.jsx    # Main form component
 │   │   └── ProjectDescriptionForm.css    # Form styling
@@ -70,9 +97,18 @@ Skelton/
 │   ├── App.css                            # Application styling
 │   ├── index.css                          # Global styles
 │   └── main.jsx                           # Application entry point
+├── Skelton.AppHost/                       # .NET Aspire orchestration
+│   ├── Program.cs                         # Aspire configuration
+│   ├── Skelton.AppHost.csproj            # AppHost project file
+│   ├── Properties/
+│   │   └── launchSettings.json           # Launch settings
+│   └── appsettings.json                  # App configuration
 ├── public/                                # Static assets
-├── package.json                           # Project dependencies
-└── vite.config.js                         # Vite configuration
+├── package.json                           # Node.js dependencies
+├── Skelton.sln                            # .NET solution file
+├── vite.config.js                         # Vite configuration
+├── README.md                              # This file
+└── ASPIRE.md                              # Aspire documentation
 ```
 
 ## Form Fields
@@ -152,6 +188,7 @@ This is the first stage of the application. Future enhancements may include:
 - **Vite**: Build tool and dev server
 - **CSS3**: Styling with modern CSS features
 - **JavaScript (ES6+)**: Application logic
+- **.NET Aspire 9.0**: Orchestration and observability framework (optional)
 
 ## License
 
