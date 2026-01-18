@@ -107,7 +107,7 @@ describe('RequiredInformation', () => {
     });
 
     it('should render warning icon in header', () => {
-      const { container } = renderWithRouter(<RequiredInformation />);
+      renderWithRouter(<RequiredInformation />);
       const warningSection = screen.getByText(/Missing Critical Details/i).parentElement;
       expect(warningSection).toBeInTheDocument();
     });
@@ -538,7 +538,7 @@ describe('RequiredInformation', () => {
     });
 
     it('should have proper button types', () => {
-      const { container } = renderWithRouter(<RequiredInformation />);
+      renderWithRouter(<RequiredInformation />);
 
       const validateButton = screen.getByRole('button', { name: /^Validate$/i });
       const nextButton = screen.getByRole('button', { name: /^Next$/i });

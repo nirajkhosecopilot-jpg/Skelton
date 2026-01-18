@@ -54,7 +54,6 @@ describe('ProjectDescriptionForm', () => {
 
     it('should render all backend framework options', () => {
       renderWithRouter(<ProjectDescriptionForm />);
-      const backendSelect = screen.getByLabelText(/Backend Framework/i);
 
       const expectedOptions = [
         'Node.js (Express)',
@@ -534,13 +533,13 @@ describe('ProjectDescriptionForm', () => {
       const user = userEvent.setup();
       renderWithRouter(<ProjectDescriptionForm />);
 
-      const backendSelect = screen.getByLabelText(/Backend Framework/i);
+      const select = screen.getByLabelText(/Backend Framework/i);
 
-      await user.selectOptions(backendSelect, 'Node.js (Express)');
-      await user.selectOptions(backendSelect, 'Python (Django)');
-      await user.selectOptions(backendSelect, 'Java (Spring Boot)');
+      await user.selectOptions(select, 'Node.js (Express)');
+      await user.selectOptions(select, 'Python (Django)');
+      await user.selectOptions(select, 'Java (Spring Boot)');
 
-      expect(backendSelect).toHaveValue('Java (Spring Boot)');
+      expect(select).toHaveValue('Java (Spring Boot)');
     });
 
     it('should handle form submission with extra whitespace in description', async () => {

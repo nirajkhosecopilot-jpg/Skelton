@@ -109,7 +109,7 @@ const ArchitectureOverview = () => {
   };
 
   // Convert structure to text format
-  const structureToText = (obj, prefix = '', isLast = true) => {
+  const structureToText = (obj, prefix = '') => {
     let result = '';
     const entries = Object.entries(obj);
 
@@ -126,7 +126,7 @@ const ArchitectureOverview = () => {
       result += `${prefix}${connector}${icon} ${key}${description}\n`;
 
       if (value.children) {
-        result += structureToText(value.children, prefix + extension, isLastItem);
+        result += structureToText(value.children, prefix + extension);
       }
     });
 
