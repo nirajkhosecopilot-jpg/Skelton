@@ -142,62 +142,10 @@ function ProjectDescriptionForm() {
     <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
       {/* Logo in top left corner */}
       <div className="fixed top-6 left-6 z-10">
-        <svg width="60" height="60" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-          {/* Background circles (orbit rings) */}
-          <g opacity="0.4" fill="none" stroke="#374151" strokeWidth="1.5">
-            <circle cx="200" cy="200" r="60" />
-            <circle cx="200" cy="200" r="90" />
-            <circle cx="200" cy="200" r="120" />
-            <circle cx="200" cy="200" r="150" />
-            <circle cx="200" cy="200" r="180" />
-          </g>
-
-          {/* Small orbit dots */}
-          <g fill="#374151">
-            <circle cx="200" cy="140" r="3" />
-            <circle cx="200" cy="260" r="3" />
-            <circle cx="80"  cy="200" r="3" />
-            <circle cx="320" cy="200" r="3" />
-
-            <circle cx="125" cy="125" r="2.5" />
-            <circle cx="275" cy="125" r="2.5" />
-            <circle cx="125" cy="275" r="2.5" />
-            <circle cx="275" cy="275" r="2.5" />
-
-            <circle cx="90"  cy="160" r="2" />
-            <circle cx="310" cy="160" r="2" />
-            <circle cx="90"  cy="240" r="2" />
-            <circle cx="310" cy="240" r="2" />
-          </g>
-
-          {/* Main stylized S shape */}
+        <svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <path
-            d="M 200 110
-               C 140 110, 110 150, 110 200
-               C 110 250, 140 290, 200 290
-               C 260 290, 290 250, 290 200
-               C 290 150, 260 110, 200 110 Z
-               M 200 150
-               C 170 150, 150 170, 150 200
-               C 150 230, 170 250, 200 250
-               C 230 250, 250 230, 250 200
-               C 250 170, 230 150, 200 150 Z"
+            d="M 30 10 L 70 10 L 70 30 L 50 30 L 50 40 L 70 40 L 70 90 L 30 90 L 30 70 L 50 70 L 50 60 L 30 60 Z"
             fill="#111827"
-            stroke="#374151"
-            strokeWidth="2"
-          />
-
-          {/* Optional subtle inner glow/highlight */}
-          <path
-            d="M 200 130
-               C 160 130, 135 165, 135 200
-               C 135 235, 160 270, 200 270
-               C 240 270, 265 235, 265 200
-               C 265 165, 240 130, 200 130 Z"
-            fill="none"
-            stroke="#6B7280"
-            strokeWidth="3"
-            opacity="0.3"
           />
         </svg>
       </div>
