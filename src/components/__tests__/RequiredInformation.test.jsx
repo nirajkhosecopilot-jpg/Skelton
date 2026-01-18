@@ -229,7 +229,7 @@ describe('RequiredInformation', () => {
       await user.click(validateButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/Please provide additional information/i)).toBeInTheDocument();
+        expect(screen.getByText(/Please provide additional information to address the missing requirements/i)).toBeInTheDocument();
       });
 
       // Then start typing
@@ -237,7 +237,7 @@ describe('RequiredInformation', () => {
       await user.type(textarea, 'New text');
 
       await waitFor(() => {
-        expect(screen.queryByText(/Please provide additional information/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Please provide additional information to address the missing requirements/i)).not.toBeInTheDocument();
       });
     });
 
@@ -313,7 +313,7 @@ describe('RequiredInformation', () => {
       await user.click(validateButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/Please provide additional information/i)).toBeInTheDocument();
+        expect(screen.getByText(/Please provide additional information to address the missing requirements/i)).toBeInTheDocument();
       });
     });
 
@@ -432,7 +432,7 @@ describe('RequiredInformation', () => {
       await user.click(validateButton);
 
       await waitFor(() => {
-        const message = screen.getByText(/Please provide additional information/i);
+        const message = screen.getByText(/Please provide additional information to address the missing requirements/i);
         const messageContainer = message.closest('div[class*="bg-amber"]');
         expect(messageContainer).toHaveClass('bg-amber-50', 'border-amber-200', 'text-amber-800');
       });
@@ -464,7 +464,7 @@ describe('RequiredInformation', () => {
       await user.click(validateButton);
 
       await waitFor(() => {
-        const errorMessage = screen.getByText(/Please provide additional information/i);
+        const errorMessage = screen.getByText(/Please provide additional information to address the missing requirements/i);
         expect(errorMessage).toBeInTheDocument();
       });
 
@@ -482,7 +482,7 @@ describe('RequiredInformation', () => {
     it('should not show validation message initially', () => {
       renderWithRouter(<RequiredInformation />);
 
-      expect(screen.queryByText(/Please provide additional information/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Please provide additional information to address the missing requirements/i)).not.toBeInTheDocument();
       expect(screen.queryByText(/Information validated successfully/i)).not.toBeInTheDocument();
     });
 
@@ -621,7 +621,7 @@ describe('RequiredInformation', () => {
       await user.click(validateButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/Please provide additional information/i)).toBeInTheDocument();
+        expect(screen.getByText(/Please provide additional information to address the missing requirements/i)).toBeInTheDocument();
       });
     });
 
@@ -666,7 +666,7 @@ describe('RequiredInformation', () => {
       // First validation - error
       await user.click(validateButton);
       await waitFor(() => {
-        expect(screen.getByText(/Please provide additional information/i)).toBeInTheDocument();
+        expect(screen.getByText(/Please provide additional information to address the missing requirements/i)).toBeInTheDocument();
       });
 
       // Add valid input
