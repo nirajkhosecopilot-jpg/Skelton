@@ -1,10 +1,17 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import ProjectDescriptionForm from './components/ProjectDescriptionForm'
+import RequiredInformation from './components/RequiredInformation'
 
 function App() {
   return (
-    <div className="min-h-screen bg-white">
-      <ProjectDescriptionForm />
-    </div>
+    <Router>
+      <div className="min-h-screen bg-white">
+        <Routes>
+          <Route path="/" element={<ProjectDescriptionForm />} />
+          <Route path="/required-information" element={<RequiredInformation />} />
+        </Routes>
+      </div>
+    </Router>
   )
 }
 

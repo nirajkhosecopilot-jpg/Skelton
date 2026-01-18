@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function ProjectDescriptionForm() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     projectDescription: '',
     backendFramework: '',
@@ -122,8 +124,8 @@ function ProjectDescriptionForm() {
     // Log to console (in production, this would be sent to backend)
     console.log('Project Information Submitted:', formData);
 
-    // Show success message
-    alert('Project information submitted successfully! Check console for details.');
+    // Navigate to Required Information page
+    navigate('/required-information');
   };
 
   const handleReset = () => {
