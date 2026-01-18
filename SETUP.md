@@ -3,17 +3,20 @@
 ## Prerequisites
 
 This project requires:
-- **Node.js**: v20.0.0 or higher
+- **Node.js**: v20 LTS (recommended) or v22 Current
 - **npm**: v10.0.0 or higher
+
+⚠️ **Important**: Do NOT use Node.js v24 or higher - these versions are unstable and not yet compatible with the packages used in this project.
 
 ## Troubleshooting npm install Issues
 
 ### Error: "Class extends value undefined is not a constructor or null"
 
 This error typically occurs when:
-1. You're using an outdated Node.js version
+1. You're using an **incompatible Node.js version** (too old OR too new)
 2. Your npm cache is corrupted
 3. There are conflicting package versions
+4. nvm version conflicts (loading config from wrong version)
 
 ### Solution Steps (Windows)
 
@@ -23,22 +26,29 @@ This error typically occurs when:
 node --version
 ```
 
-If you see a version lower than v20.0.0, you need to upgrade Node.js.
+**Supported versions:**
+- ✅ v20.x.x (LTS - **RECOMMENDED**)
+- ✅ v22.x.x (Current)
+- ❌ v18.x.x or older (TOO OLD)
+- ❌ v24.x.x or newer (TOO NEW - unstable)
 
-#### 2. Upgrade Node.js
+#### 2. Install the Correct Node.js Version
 
 **Option A: Download from Official Website**
 - Visit https://nodejs.org/
-- Download and install Node.js v20 LTS or v22 Current
+- Download and install **Node.js v20 LTS** (most stable)
 - Restart your terminal after installation
 
-**Option B: Use nvm-windows (Recommended)**
+**Option B: Use nvm-windows (Recommended for managing versions)**
 ```cmd
 # Install nvm-windows from: https://github.com/coreybutler/nvm-windows/releases
 
-# After installation, use the .nvmrc file:
-nvm install 20
-nvm use 20
+# Install Node v20 LTS:
+nvm install 20.18.1
+nvm use 20.18.1
+
+# Verify the version:
+node --version
 ```
 
 #### 3. Clean npm Cache and Reinstall
