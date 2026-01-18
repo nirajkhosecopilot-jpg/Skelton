@@ -110,6 +110,18 @@ function RequiredInformation() {
           <p className="text-gray-600 text-base ml-9">
             Based on your project description, we need additional details to create a comprehensive technical specification.
           </p>
+          <div className="ml-9 mt-4">
+            <button
+              type="button"
+              onClick={() => navigate('/architecture')}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              View Architecture Overview
+            </button>
+          </div>
         </div>
 
         {/* Required Information List */}
