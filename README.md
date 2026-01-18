@@ -16,7 +16,7 @@ A React-based web application for collecting project information including backe
 
 ### Prerequisites
 
-- Node.js (v18 or higher recommended)
+- Node.js (v20.19+ or v22.12+ required for Vite)
 - npm or yarn
 
 ### Installation
@@ -64,10 +64,15 @@ For a better development experience with built-in dashboard, monitoring, and orc
 
 **Prerequisites:**
 - .NET 9.0 SDK or later
-- Aspire workload installed: `dotnet workload install aspire`
+- Node.js 20.19+ or 22.12+ (required for Vite)
 
 **Quick Start:**
 ```bash
+# Use helper scripts (includes version checks)
+./run-aspire.sh    # Linux/macOS
+run-aspire.bat     # Windows
+
+# Or run directly
 cd Skelton.AppHost
 dotnet run
 ```
@@ -185,10 +190,10 @@ This is the first stage of the application. Future enhancements may include:
 ## Technologies Used
 
 - **React 18**: UI library
-- **Vite**: Build tool and dev server
+- **Vite**: Build tool and dev server (requires Node.js 20.19+ or 22.12+)
 - **CSS3**: Styling with modern CSS features
 - **JavaScript (ES6+)**: Application logic
-- **.NET Aspire 9.0**: Orchestration and observability framework (optional)
+- **.NET Aspire 9.2**: Orchestration and observability framework via NuGet SDK (optional)
 
 ## License
 
