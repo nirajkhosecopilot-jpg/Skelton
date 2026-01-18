@@ -58,13 +58,6 @@ elif [ "$NODE_MAJOR" -eq 22 ] && [ "$NODE_MINOR" -lt 12 ]; then
     exit 1
 fi
 
-# Check if node_modules exists
-if [ ! -d "node_modules" ]; then
-    echo ""
-    echo "Installing npm dependencies..."
-    npm install
-fi
-
 # Navigate to AppHost and run
 echo ""
 echo "Starting Aspire AppHost..."
