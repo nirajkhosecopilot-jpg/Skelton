@@ -140,6 +140,7 @@ function Architecture() {
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-3">
             <button
+              type="button"
               onClick={() => navigate('/required-information')}
               className="text-gray-600 hover:text-gray-900 transition-colors"
               aria-label="Go back"
@@ -323,11 +324,11 @@ function Architecture() {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500">
             Need help? Review the{' '}
-            <button onClick={() => navigate('/required-information')} className="text-gray-900 hover:underline font-medium">
+            <button type="button" onClick={() => navigate('/required-information')} className="text-gray-900 hover:underline font-medium">
               required information
             </button>
             {' '}or{' '}
-            <button onClick={() => navigate('/')} className="text-gray-900 hover:underline font-medium">
+            <button type="button" onClick={() => navigate('/')} className="text-gray-900 hover:underline font-medium">
               project description
             </button>
             {' '}you provided earlier.

@@ -94,6 +94,7 @@ function RequiredInformation() {
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-3">
             <button
+              type="button"
               onClick={() => navigate('/')}
               className="text-gray-600 hover:text-gray-900 transition-colors"
               aria-label="Go back"
@@ -207,12 +208,14 @@ function RequiredInformation() {
         {/* Action Buttons */}
         <div className="flex gap-4">
           <button
+            type="button"
             onClick={handleValidate}
             className="flex-1 bg-white text-gray-900 px-6 py-3 rounded-lg font-medium border-2 border-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all"
           >
             Validate
           </button>
           <button
+            type="button"
             onClick={handleNext}
             className="flex-1 bg-gray-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all"
           >
@@ -224,7 +227,7 @@ function RequiredInformation() {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500">
             Need help? Review the{' '}
-            <button onClick={() => navigate('/')} className="text-gray-900 hover:underline font-medium">
+            <button type="button" onClick={() => navigate('/')} className="text-gray-900 hover:underline font-medium">
               project description
             </button>
             {' '}you provided earlier.

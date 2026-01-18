@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import RequiredInformation from '../RequiredInformation';
@@ -229,7 +229,7 @@ describe('RequiredInformation', () => {
       await user.click(validateButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/Please provide additional information/i)).toBeInTheDocument();
+        expect(screen.getByText(/Please provide additional information to address the missing requirements/i)).toBeInTheDocument();
       });
 
       // Then start typing
@@ -237,17 +237,16 @@ describe('RequiredInformation', () => {
       await user.type(textarea, 'New text');
 
       await waitFor(() => {
-        expect(screen.queryByText(/Please provide additional information/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Please provide additional information to address the missing requirements/i)).not.toBeInTheDocument();
       });
     });
 
     it('should handle long text input', async () => {
-      const user = userEvent.setup();
       renderWithRouter(<RequiredInformation />);
 
       const longText = 'A'.repeat(1000);
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, longText);
+      fireEvent.change(textarea, { target: { value: longText } });
 
       expect(textarea).toHaveValue(longText);
       await waitFor(() => {
@@ -256,34 +255,31 @@ describe('RequiredInformation', () => {
     });
 
     it('should handle special characters in input', async () => {
-      const user = userEvent.setup();
       renderWithRouter(<RequiredInformation />);
 
       const specialChars = '!@#$%^&*()_+-={}[]|:;"<>?,./~`';
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, specialChars);
+      fireEvent.change(textarea, { target: { value: specialChars } });
 
       expect(textarea).toHaveValue(specialChars);
     });
 
     it('should handle unicode characters in input', async () => {
-      const user = userEvent.setup();
       renderWithRouter(<RequiredInformation />);
 
       const unicode = '你好世界 🚀 Привет';
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, unicode);
+      fireEvent.change(textarea, { target: { value: unicode } });
 
       expect(textarea).toHaveValue(unicode);
     });
 
     it('should handle multiline input', async () => {
-      const user = userEvent.setup();
       renderWithRouter(<RequiredInformation />);
 
       const multilineText = 'Line 1\nLine 2\nLine 3 with enough characters to be valid';
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, multilineText);
+      fireEvent.change(textarea, { target: { value: multilineText } });
 
       expect(textarea).toHaveValue(multilineText);
     });
@@ -314,7 +310,7 @@ describe('RequiredInformation', () => {
       await user.click(validateButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/Please provide additional information/i)).toBeInTheDocument();
+        expect(screen.getByText(/Please provide additional information to address the missing requirements/i)).toBeInTheDocument();
       });
     });
 
@@ -371,7 +367,7 @@ describe('RequiredInformation', () => {
 
       const validInput = 'This is valid input with more than fifty characters for testing';
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, validInput);
+      fireEvent.change(textarea, { target: { value: validInput } });
 
       const validateButton = screen.getByRole('button', { name: /^Validate$/i });
       await user.click(validateButton);
@@ -433,7 +429,8 @@ describe('RequiredInformation', () => {
       await user.click(validateButton);
 
       await waitFor(() => {
-        const messageContainer = screen.getByText(/Please provide additional information/i).closest('div');
+        const message = screen.getByText(/Please provide additional information to address the missing requirements/i);
+        const messageContainer = message.closest('div[class*="bg-amber"]');
         expect(messageContainer).toHaveClass('bg-amber-50', 'border-amber-200', 'text-amber-800');
       });
     });
@@ -449,7 +446,8 @@ describe('RequiredInformation', () => {
       await user.click(validateButton);
 
       await waitFor(() => {
-        const messageContainer = screen.getByText(/Information validated successfully/i).closest('div');
+        const message = screen.getByText(/Information validated successfully/i);
+        const messageContainer = message.closest('div[class*="bg-green"]');
         expect(messageContainer).toHaveClass('bg-green-50', 'border-green-200', 'text-green-800');
       });
     });
@@ -463,7 +461,7 @@ describe('RequiredInformation', () => {
       await user.click(validateButton);
 
       await waitFor(() => {
-        const errorMessage = screen.getByText(/Please provide additional information/i);
+        const errorMessage = screen.getByText(/Please provide additional information to address the missing requirements/i);
         expect(errorMessage).toBeInTheDocument();
       });
 
@@ -481,7 +479,7 @@ describe('RequiredInformation', () => {
     it('should not show validation message initially', () => {
       renderWithRouter(<RequiredInformation />);
 
-      expect(screen.queryByText(/Please provide additional information/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Please provide additional information to address the missing requirements/i)).not.toBeInTheDocument();
       expect(screen.queryByText(/Information validated successfully/i)).not.toBeInTheDocument();
     });
 
@@ -578,12 +576,11 @@ describe('RequiredInformation', () => {
     });
 
     it('should handle extremely long input', async () => {
-      const user = userEvent.setup();
       renderWithRouter(<RequiredInformation />);
 
       const veryLongText = 'A'.repeat(10000);
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, veryLongText);
+      fireEvent.change(textarea, { target: { value: veryLongText } });
 
       expect(textarea).toHaveValue(veryLongText);
       await waitFor(() => {
@@ -615,13 +612,13 @@ describe('RequiredInformation', () => {
 
       const whitespace = ' '.repeat(60);
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, whitespace);
+      fireEvent.change(textarea, { target: { value: whitespace } });
 
       const validateButton = screen.getByRole('button', { name: /^Validate$/i });
       await user.click(validateButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/Please provide additional information/i)).toBeInTheDocument();
+        expect(screen.getByText(/Please provide additional information to address the missing requirements/i)).toBeInTheDocument();
       });
     });
 
@@ -666,7 +663,7 @@ describe('RequiredInformation', () => {
       // First validation - error
       await user.click(validateButton);
       await waitFor(() => {
-        expect(screen.getByText(/Please provide additional information/i)).toBeInTheDocument();
+        expect(screen.getByText(/Please provide additional information to address the missing requirements/i)).toBeInTheDocument();
       });
 
       // Add valid input

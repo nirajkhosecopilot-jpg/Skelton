@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import Architecture from '../Architecture';
@@ -78,8 +78,9 @@ describe('Architecture', () => {
         'Other'
       ];
 
+      const patternSelect = screen.getByLabelText(/Architecture Pattern/i);
       expectedPatterns.forEach(pattern => {
-        expect(screen.getByRole('option', { name: pattern })).toBeInTheDocument();
+        expect(within(patternSelect).getByRole('option', { name: pattern })).toBeInTheDocument();
       });
     });
 
@@ -96,8 +97,9 @@ describe('Architecture', () => {
         'Other'
       ];
 
+      const deploymentSelect = screen.getByLabelText(/Deployment Strategy/i);
       expectedStrategies.forEach(strategy => {
-        expect(screen.getByRole('option', { name: strategy })).toBeInTheDocument();
+        expect(within(deploymentSelect).getByRole('option', { name: strategy })).toBeInTheDocument();
       });
     });
 
@@ -117,8 +119,9 @@ describe('Architecture', () => {
         'Other'
       ];
 
+      const infrastructureSelect = screen.getByLabelText(/Infrastructure/i);
       expectedOptions.forEach(option => {
-        expect(screen.getByRole('option', { name: option })).toBeInTheDocument();
+        expect(within(infrastructureSelect).getByRole('option', { name: option })).toBeInTheDocument();
       });
     });
 
@@ -135,8 +138,9 @@ describe('Architecture', () => {
         'Other'
       ];
 
+      const scalingSelect = screen.getByLabelText(/Scaling Approach/i);
       expectedOptions.forEach(option => {
-        expect(screen.getByRole('option', { name: option })).toBeInTheDocument();
+        expect(within(scalingSelect).getByRole('option', { name: option })).toBeInTheDocument();
       });
     });
 
@@ -474,7 +478,8 @@ describe('Architecture', () => {
       await user.click(screen.getByRole('button', { name: /^Validate$/i }));
 
       await waitFor(() => {
-        const messageContainer = screen.getByText(/Please fill in all required fields/i).closest('div');
+        const message = screen.getByText(/Please fill in all required fields/i);
+        const messageContainer = message.closest('div[class*="bg-amber"]');
         expect(messageContainer).toHaveClass('bg-amber-50', 'border-amber-200', 'text-amber-800');
       });
     });
@@ -491,7 +496,8 @@ describe('Architecture', () => {
       await user.click(screen.getByRole('button', { name: /^Validate$/i }));
 
       await waitFor(() => {
-        const messageContainer = screen.getByText(/validated successfully/i).closest('div');
+        const message = screen.getByText(/validated successfully/i);
+        const messageContainer = message.closest('div[class*="bg-green"]');
         expect(messageContainer).toHaveClass('bg-green-50', 'border-green-200', 'text-green-800');
       });
     });
@@ -601,23 +607,21 @@ describe('Architecture', () => {
     });
 
     it('should handle long additional notes', async () => {
-      const user = userEvent.setup();
       renderWithRouter(<Architecture />);
 
       const longNotes = 'A'.repeat(5000);
       const textarea = screen.getByLabelText(/Additional Architectural Notes/i);
-      await user.type(textarea, longNotes);
+      fireEvent.change(textarea, { target: { value: longNotes } });
 
       expect(textarea).toHaveValue(longNotes);
     });
 
     it('should handle special characters in additional notes', async () => {
-      const user = userEvent.setup();
       renderWithRouter(<Architecture />);
 
       const specialChars = '!@#$%^&*()_+-={}[]|:;"<>?,./~`';
       const textarea = screen.getByLabelText(/Additional Architectural Notes/i);
-      await user.type(textarea, specialChars);
+      fireEvent.change(textarea, { target: { value: specialChars } });
 
       expect(textarea).toHaveValue(specialChars);
     });
