@@ -1,10 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 
 const ArchitectureOverview = () => {
   const navigate = useNavigate();
   const [downloadFormat, setDownloadFormat] = useState('txt');
-  const folderStructureRef = useRef(null);
 
   // Recommended folder structure
   const folderStructure = {
@@ -175,38 +174,6 @@ const ArchitectureOverview = () => {
     URL.revokeObjectURL(url);
   };
 
-  // Download as SVG image
-  const handleDownloadSVG = () => {
-    const textContent = structureToText(folderStructure);
-    const lines = textContent.split('\n').filter(line => line.trim());
-
-    const lineHeight = 20;
-    const padding = 40;
-    const width = 800;
-    const height = lines.length * lineHeight + padding * 2;
-
-    const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-  <rect width="100%" height="100%" fill="#ffffff"/>
-  <text x="${padding}" y="${padding}" font-family="monospace" font-size="14" fill="#111827">
-    <tspan x="${padding}" dy="0" font-weight="bold" font-size="16">Recommended Project Architecture</tspan>
-    ${lines.map((line, i) =>
-      `<tspan x="${padding}" dy="${lineHeight}" font-size="12">${line.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</tspan>`
-    ).join('\n    ')}
-  </text>
-</svg>`;
-
-    const blob = new Blob([svgContent], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'architecture-overview.svg';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
   // Render folder structure recursively
   const renderStructure = (obj, level = 0) => {
     return Object.entries(obj).map(([key, value]) => {
@@ -257,11 +224,12 @@ const ArchitectureOverview = () => {
     <div className="min-h-screen bg-white">
       {/* Fixed Logo */}
       <div className="fixed top-6 left-6 z-10">
-        <img
-          src="/skelton-logo.png"
-          alt="Skelton Logo"
-          className="w-[60px] h-[60px] object-contain"
-        />
+        <svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M 30 10 L 70 10 L 70 30 L 50 30 L 50 40 L 70 40 L 70 90 L 30 90 L 30 70 L 50 70 L 50 60 L 30 60 Z"
+            fill="#111827"
+          />
+        </svg>
       </div>
 
       {/* Main Content */}
@@ -350,7 +318,7 @@ const ArchitectureOverview = () => {
               </select>
             </div>
 
-            {/* Download Buttons */}
+            {/* Download Button */}
             <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
               <button
                 onClick={handleDownload}
@@ -360,19 +328,7 @@ const ArchitectureOverview = () => {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Download File
-                </span>
-              </button>
-
-              <button
-                onClick={handleDownloadSVG}
-                className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all font-medium"
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  Download as SVG
+                  Download
                 </span>
               </button>
             </div>
