@@ -73,9 +73,8 @@ function RequiredInformation() {
       return;
     }
 
-    // In future, this would navigate to the next page
     console.log('Proceeding to next step with information:', additionalInfo);
-    alert('Moving to next step! (Next page to be implemented)');
+    navigate('/architecture');
   };
 
   return (
