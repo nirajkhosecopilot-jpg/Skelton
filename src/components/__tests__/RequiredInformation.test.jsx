@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import RequiredInformation from '../RequiredInformation';
@@ -256,12 +256,11 @@ describe('RequiredInformation', () => {
     });
 
     it('should handle special characters in input', async () => {
-      const user = userEvent.setup();
       renderWithRouter(<RequiredInformation />);
 
       const specialChars = '!@#$%^&*()_+-={}[]|:;"<>?,./~`';
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, specialChars);
+      fireEvent.change(textarea, { target: { value: specialChars } });
 
       expect(textarea).toHaveValue(specialChars);
     });
@@ -433,7 +432,8 @@ describe('RequiredInformation', () => {
       await user.click(validateButton);
 
       await waitFor(() => {
-        const messageContainer = screen.getByText(/Please provide additional information/i).closest('div');
+        const message = screen.getByText(/Please provide additional information/i);
+        const messageContainer = message.closest('div[class*="bg-amber"]');
         expect(messageContainer).toHaveClass('bg-amber-50', 'border-amber-200', 'text-amber-800');
       });
     });
@@ -449,7 +449,8 @@ describe('RequiredInformation', () => {
       await user.click(validateButton);
 
       await waitFor(() => {
-        const messageContainer = screen.getByText(/Information validated successfully/i).closest('div');
+        const message = screen.getByText(/Information validated successfully/i);
+        const messageContainer = message.closest('div[class*="bg-green"]');
         expect(messageContainer).toHaveClass('bg-green-50', 'border-green-200', 'text-green-800');
       });
     });
@@ -578,12 +579,11 @@ describe('RequiredInformation', () => {
     });
 
     it('should handle extremely long input', async () => {
-      const user = userEvent.setup();
       renderWithRouter(<RequiredInformation />);
 
       const veryLongText = 'A'.repeat(10000);
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, veryLongText);
+      fireEvent.change(textarea, { target: { value: veryLongText } });
 
       expect(textarea).toHaveValue(veryLongText);
       await waitFor(() => {
@@ -615,7 +615,7 @@ describe('RequiredInformation', () => {
 
       const whitespace = ' '.repeat(60);
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, whitespace);
+      fireEvent.change(textarea, { target: { value: whitespace } });
 
       const validateButton = screen.getByRole('button', { name: /^Validate$/i });
       await user.click(validateButton);

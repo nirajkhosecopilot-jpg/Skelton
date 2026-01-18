@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import ProjectDescriptionForm from '../ProjectDescriptionForm';
@@ -69,8 +69,9 @@ describe('ProjectDescriptionForm', () => {
         'Other'
       ];
 
+      const backendSelect = screen.getByLabelText(/Backend Framework/i);
       expectedOptions.forEach(option => {
-        expect(screen.getByRole('option', { name: option })).toBeInTheDocument();
+        expect(within(backendSelect).getByRole('option', { name: option })).toBeInTheDocument();
       });
     });
 
@@ -87,8 +88,9 @@ describe('ProjectDescriptionForm', () => {
         'Other'
       ];
 
+      const frontendSelect = screen.getByLabelText(/Frontend Framework/i);
       expectedOptions.forEach(option => {
-        expect(screen.getByRole('option', { name: option })).toBeInTheDocument();
+        expect(within(frontendSelect).getByRole('option', { name: option })).toBeInTheDocument();
       });
     });
 
@@ -108,8 +110,9 @@ describe('ProjectDescriptionForm', () => {
         'Other'
       ];
 
+      const databaseSelect = screen.getByLabelText(/Database Preferred/i);
       expectedOptions.forEach(option => {
-        expect(screen.getByRole('option', { name: option })).toBeInTheDocument();
+        expect(within(databaseSelect).getByRole('option', { name: option })).toBeInTheDocument();
       });
     });
 
@@ -129,8 +132,9 @@ describe('ProjectDescriptionForm', () => {
         'Other'
       ];
 
+      const messagingSelect = screen.getByLabelText(/Messaging Queue Framework/i);
       expectedOptions.forEach(option => {
-        expect(screen.getByRole('option', { name: option })).toBeInTheDocument();
+        expect(within(messagingSelect).getByRole('option', { name: option })).toBeInTheDocument();
       });
     });
 
@@ -500,33 +504,33 @@ describe('ProjectDescriptionForm', () => {
   // ===== EDGE CASES =====
   describe('Edge Cases', () => {
     it('should handle very long project description', async () => {
-      const user = userEvent.setup();
       renderWithRouter(<ProjectDescriptionForm />);
 
       const longDescription = 'A'.repeat(5000);
-      await user.type(screen.getByLabelText(/Project Description/i), longDescription);
+      const textarea = screen.getByLabelText(/Project Description/i);
+      fireEvent.change(textarea, { target: { value: longDescription } });
 
-      expect(screen.getByLabelText(/Project Description/i)).toHaveValue(longDescription);
+      expect(textarea).toHaveValue(longDescription);
     });
 
     it('should handle special characters in project description', async () => {
-      const user = userEvent.setup();
       renderWithRouter(<ProjectDescriptionForm />);
 
       const specialChars = '!@#$%^&*()_+-={}[]|:;"<>?,./~`';
-      await user.type(screen.getByLabelText(/Project Description/i), specialChars);
+      const textarea = screen.getByLabelText(/Project Description/i);
+      fireEvent.change(textarea, { target: { value: specialChars } });
 
-      expect(screen.getByLabelText(/Project Description/i)).toHaveValue(specialChars);
+      expect(textarea).toHaveValue(specialChars);
     });
 
     it('should handle unicode characters in project description', async () => {
-      const user = userEvent.setup();
       renderWithRouter(<ProjectDescriptionForm />);
 
       const unicode = '你好世界 🚀 Привет мир';
-      await user.type(screen.getByLabelText(/Project Description/i), unicode);
+      const textarea = screen.getByLabelText(/Project Description/i);
+      fireEvent.change(textarea, { target: { value: unicode } });
 
-      expect(screen.getByLabelText(/Project Description/i)).toHaveValue(unicode);
+      expect(textarea).toHaveValue(unicode);
     });
 
     it('should handle rapid form field changes', async () => {
