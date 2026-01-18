@@ -109,7 +109,7 @@ const ArchitectureOverview = () => {
   };
 
   // Convert structure to text format
-  const structureToText = (obj, prefix = '', isLast = true) => {
+  const structureToText = (obj, prefix = '') => {
     let result = '';
     const entries = Object.entries(obj);
 

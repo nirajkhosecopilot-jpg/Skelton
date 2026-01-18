@@ -54,7 +54,6 @@ describe('ProjectDescriptionForm', () => {
 
     it('should render all backend framework options', () => {
       renderWithRouter(<ProjectDescriptionForm />);
-      const backendSelect = screen.getByLabelText(/Backend Framework/i);
 
       const expectedOptions = [
         'Node.js (Express)',
