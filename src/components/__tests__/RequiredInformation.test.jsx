@@ -242,12 +242,11 @@ describe('RequiredInformation', () => {
     });
 
     it('should handle long text input', async () => {
-      const user = userEvent.setup();
       renderWithRouter(<RequiredInformation />);
 
       const longText = 'A'.repeat(1000);
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, longText);
+      fireEvent.change(textarea, { target: { value: longText } });
 
       expect(textarea).toHaveValue(longText);
       await waitFor(() => {
@@ -266,23 +265,21 @@ describe('RequiredInformation', () => {
     });
 
     it('should handle unicode characters in input', async () => {
-      const user = userEvent.setup();
       renderWithRouter(<RequiredInformation />);
 
       const unicode = '你好世界 🚀 Привет';
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, unicode);
+      fireEvent.change(textarea, { target: { value: unicode } });
 
       expect(textarea).toHaveValue(unicode);
     });
 
     it('should handle multiline input', async () => {
-      const user = userEvent.setup();
       renderWithRouter(<RequiredInformation />);
 
       const multilineText = 'Line 1\nLine 2\nLine 3 with enough characters to be valid';
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, multilineText);
+      fireEvent.change(textarea, { target: { value: multilineText } });
 
       expect(textarea).toHaveValue(multilineText);
     });
@@ -370,7 +367,7 @@ describe('RequiredInformation', () => {
 
       const validInput = 'This is valid input with more than fifty characters for testing';
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, validInput);
+      fireEvent.change(textarea, { target: { value: validInput } });
 
       const validateButton = screen.getByRole('button', { name: /^Validate$/i });
       await user.click(validateButton);
