@@ -9,6 +9,8 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:aspire": "npm run clean && npm install && npm run dev",
+    "clean": "rm -rf node_modules package-lock.json && npm cache clean --force",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
