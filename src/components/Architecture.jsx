@@ -120,7 +120,7 @@ function Architecture() {
     }
 
     console.log('Proceeding with architecture:', architectureData);
-    alert('Architecture configuration complete! (Next page to be implemented)');
+    navigate('/architecture-overview');
   };
 
   return (
