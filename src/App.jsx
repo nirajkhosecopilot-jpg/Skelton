@@ -1,9 +1,8 @@
-import './App.css'
 import ProjectDescriptionForm from './components/ProjectDescriptionForm'
 
 function App() {
   return (
-    <div className="App">
+    <div className="min-h-screen bg-white">
       <ProjectDescriptionForm />
     </div>
   )
