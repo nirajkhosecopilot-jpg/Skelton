@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "vite",
     "dev:aspire": "npm run clean && npm install && npm run dev",
-    "clean": "rm -rf node_modules package-lock.json && npm cache clean --force",
+    "clean": "rimraf node_modules package-lock.json && npm cache clean --force",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -32,6 +32,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "postcss": "^8.5.6",
+    "rimraf": "^6.1.2",
     "tailwindcss": "^4.1.18",
     "vite": "^7.2.4"
   }
