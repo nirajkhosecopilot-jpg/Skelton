@@ -58,12 +58,29 @@ elif [ "$NODE_MAJOR" -eq 22 ] && [ "$NODE_MINOR" -lt 12 ]; then
     exit 1
 fi
 
-# Check if node_modules exists
-if [ ! -d "node_modules" ]; then
-    echo ""
-    echo "Installing npm dependencies..."
-    npm install
+# Clean npm cache and reinstall dependencies
+echo ""
+echo "Cleaning npm cache and dependencies..."
+
+# Remove node_modules if it exists
+if [ -d "node_modules" ]; then
+    echo "Removing node_modules..."
+    rm -rf node_modules
 fi
+
+# Remove package-lock.json if it exists
+if [ -f "package-lock.json" ]; then
+    echo "Removing package-lock.json..."
+    rm -f package-lock.json
+fi
+
+# Clear npm cache
+echo "Clearing npm cache..."
+npm cache clean --force
+
+# Install fresh dependencies
+echo "Installing npm dependencies..."
+npm install
 
 # Navigate to AppHost and run
 echo ""
