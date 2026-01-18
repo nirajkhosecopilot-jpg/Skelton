@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import ArchitectureOverview from '../ArchitectureOverview';
@@ -82,7 +82,7 @@ describe('ArchitectureOverview', () => {
     it('should render folder structure section', () => {
       renderWithRouter(<ArchitectureOverview />);
 
-      expect(screen.getByText(/Folder Structure/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Folder Structure/i })).toBeInTheDocument();
       expect(screen.getByText(/Expandable tree view/i)).toBeInTheDocument();
     });
 
@@ -111,10 +111,10 @@ describe('ArchitectureOverview', () => {
     it('should render architecture notes section', () => {
       renderWithRouter(<ArchitectureOverview />);
 
-      expect(screen.getByText(/Architecture Notes/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Architecture Notes/i })).toBeInTheDocument();
       expect(screen.getByText(/Monorepo structure/i)).toBeInTheDocument();
       expect(screen.getByText(/Separation of concerns/i)).toBeInTheDocument();
-      expect(screen.getByText(/Shared code/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Shared code/i).length).toBeGreaterThan(0);
       expect(screen.getByText(/Scalability/i)).toBeInTheDocument();
       expect(screen.getByText(/DevOps ready/i)).toBeInTheDocument();
     });
@@ -136,13 +136,13 @@ describe('ArchitectureOverview', () => {
     it('should render backend subfolder structure', () => {
       renderWithRouter(<ArchitectureOverview />);
 
-      expect(screen.getByText('controllers')).toBeInTheDocument();
-      expect(screen.getByText('models')).toBeInTheDocument();
-      expect(screen.getByText('services')).toBeInTheDocument();
-      expect(screen.getByText('middlewares')).toBeInTheDocument();
-      expect(screen.getByText('routes')).toBeInTheDocument();
-      expect(screen.getByText('config')).toBeInTheDocument();
-      expect(screen.getByText('utils')).toBeInTheDocument();
+      expect(screen.getAllByText('controllers').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('models').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('services').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('middlewares').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('routes').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('config').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('utils').length).toBeGreaterThan(0);
     });
 
     it('should render frontend subfolder structure', () => {
@@ -168,10 +168,10 @@ describe('ArchitectureOverview', () => {
     it('should render file elements', () => {
       renderWithRouter(<ArchitectureOverview />);
 
-      expect(screen.getByText('package.json')).toBeInTheDocument();
-      expect(screen.getByText('.env')).toBeInTheDocument();
-      expect(screen.getByText('README.md')).toBeInTheDocument();
-      expect(screen.getByText('.gitignore')).toBeInTheDocument();
+      expect(screen.getAllByText('package.json').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('.env').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('README.md').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('.gitignore').length).toBeGreaterThan(0);
     });
   });
 
@@ -279,10 +279,22 @@ describe('ArchitectureOverview', () => {
     it('should download txt file with correct filename', async () => {
       const user = userEvent.setup();
       let createdLink = null;
+      const originalAppendChild = document.body.appendChild.bind(document.body);
+      const originalRemoveChild = document.body.removeChild.bind(document.body);
+
       const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation((node) => {
-        if (node.tagName === 'A') {
+        if (node.tagName && node.tagName.toUpperCase() === 'A') {
           createdLink = node;
+          return node;
         }
+        return originalAppendChild(node);
+      });
+
+      const removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation((node) => {
+        if (node.tagName && node.tagName.toUpperCase() === 'A') {
+          return node;
+        }
+        return originalRemoveChild(node);
       });
 
       renderWithRouter(<ArchitectureOverview />);
@@ -294,15 +306,28 @@ describe('ArchitectureOverview', () => {
       expect(createdLink.download).toBe('architecture-overview.txt');
 
       appendChildSpy.mockRestore();
+      removeChildSpy.mockRestore();
     });
 
     it('should download json file when json format is selected', async () => {
       const user = userEvent.setup();
       let createdLink = null;
+      const originalAppendChild = document.body.appendChild.bind(document.body);
+      const originalRemoveChild = document.body.removeChild.bind(document.body);
+
       const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation((node) => {
-        if (node.tagName === 'A') {
+        if (node.tagName && node.tagName.toUpperCase() === 'A') {
           createdLink = node;
+          return node;
         }
+        return originalAppendChild(node);
+      });
+
+      const removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation((node) => {
+        if (node.tagName && node.tagName.toUpperCase() === 'A') {
+          return node;
+        }
+        return originalRemoveChild(node);
       });
 
       renderWithRouter(<ArchitectureOverview />);
@@ -313,18 +338,32 @@ describe('ArchitectureOverview', () => {
       const downloadButton = screen.getByRole('button', { name: /Download/i });
       await user.click(downloadButton);
 
+      expect(createdLink).not.toBeNull();
       expect(createdLink.download).toBe('architecture-overview.json');
 
       appendChildSpy.mockRestore();
+      removeChildSpy.mockRestore();
     });
 
     it('should download markdown file when md format is selected', async () => {
       const user = userEvent.setup();
       let createdLink = null;
+      const originalAppendChild = document.body.appendChild.bind(document.body);
+      const originalRemoveChild = document.body.removeChild.bind(document.body);
+
       const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation((node) => {
-        if (node.tagName === 'A') {
+        if (node.tagName && node.tagName.toUpperCase() === 'A') {
           createdLink = node;
+          return node;
         }
+        return originalAppendChild(node);
+      });
+
+      const removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation((node) => {
+        if (node.tagName && node.tagName.toUpperCase() === 'A') {
+          return node;
+        }
+        return originalRemoveChild(node);
       });
 
       renderWithRouter(<ArchitectureOverview />);
@@ -335,9 +374,11 @@ describe('ArchitectureOverview', () => {
       const downloadButton = screen.getByRole('button', { name: /Download/i });
       await user.click(downloadButton);
 
+      expect(createdLink).not.toBeNull();
       expect(createdLink.download).toBe('architecture-overview.md');
 
       appendChildSpy.mockRestore();
+      removeChildSpy.mockRestore();
     });
 
     it('should handle multiple downloads', async () => {
@@ -459,7 +500,7 @@ describe('ArchitectureOverview', () => {
     it('should render nested structure with proper indentation', () => {
       const { container } = renderWithRouter(<ArchitectureOverview />);
 
-      const nestedElements = container.querySelectorAll('[style*="marginLeft"]');
+      const nestedElements = container.querySelectorAll('[style*="margin-left"]');
       expect(nestedElements.length).toBeGreaterThan(0);
     });
 
@@ -667,7 +708,7 @@ describe('ArchitectureOverview', () => {
       ];
 
       notes.forEach(note => {
-        expect(screen.getByText(new RegExp(note, 'i'))).toBeInTheDocument();
+        expect(screen.getAllByText(new RegExp(note, 'i')).length).toBeGreaterThan(0);
       });
     });
   });
