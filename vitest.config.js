@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,
-    environment: 'jsdom',
+    environment: 'happy-dom',
     setupFiles: './src/setupTests.js',
     css: true,
     coverage: {
@@ -15,11 +15,6 @@ export default defineConfig({
         'node_modules/',
         'src/setupTests.js',
       ],
-    },
-  },
-  server: {
-    deps: {
-      inline: ['@exodus/bytes', 'html-encoding-sniffer'],
     },
   },
 });
