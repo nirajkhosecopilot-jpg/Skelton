@@ -2,16 +2,21 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"skelton-api/models"
 )
 
 // ProjectHandler handles project description requests
-type ProjectHandler struct{}
+type ProjectHandler struct {
+	llmService models.LLMServiceInterface
+}
 
 // NewProjectHandler creates a new ProjectHandler
-func NewProjectHandler() *ProjectHandler {
-	return &ProjectHandler{}
+func NewProjectHandler(llmService models.LLMServiceInterface) *ProjectHandler {
+	return &ProjectHandler{
+		llmService: llmService,
+	}
 }
 
 // HandleProjectDescription handles POST requests for project description validation
@@ -41,7 +46,15 @@ func (h *ProjectHandler) HandleProjectDescription(w http.ResponseWriter, r *http
 	defer r.Body.Close()
 
 	// Validate the project description and get missing information
-	missingInfo := projectDesc.Validate()
+	// Use LLM-based validation if available, fallback to static validation
+	var missingInfo models.MissingInformation
+	if h.llmService != nil {
+		log.Println("Using LLM-based validation")
+		missingInfo = projectDesc.ValidateWithLLM(h.llmService)
+	} else {
+		log.Println("Using static validation (LLM service not available)")
+		missingInfo = projectDesc.Validate()
+	}
 
 	// Return the response
 	w.WriteHeader(http.StatusOK)

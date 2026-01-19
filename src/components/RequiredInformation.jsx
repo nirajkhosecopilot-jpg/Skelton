@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 function RequiredInformation() {
@@ -9,6 +9,23 @@ function RequiredInformation() {
 
   // Get API response from navigation state
   const apiResponse = location.state?.apiResponse || null;
+
+  // Pre-load missing information with placeholders
+  useEffect(() => {
+    if (apiResponse && apiResponse.missingFields) {
+      const placeholders = apiResponse.missingFields
+        .filter(field => field.placeholder)
+        .map((field, index) => {
+          const fieldTitle = field.field.charAt(0).toUpperCase() + field.field.slice(1).replace(/([A-Z])/g, ' $1');
+          return `${index + 1}. ${fieldTitle}:\n${field.placeholder}\n\n`;
+        })
+        .join('');
+
+      if (placeholders) {
+        setAdditionalInfo(placeholders);
+      }
+    }
+  }, [apiResponse]);
 
   // Get required information from API response or use default
   const getMissingFields = () => {
@@ -48,28 +65,26 @@ function RequiredInformation() {
   const missingFields = getMissingFields();
 
   const handleValidate = () => {
-    if (!additionalInfo.trim()) {
-      setValidationMessage('Please provide additional information to address the missing requirements.');
-      return;
+    // Validation is now optional - users can proceed with or without additional info
+    if (additionalInfo.trim()) {
+      setValidationMessage('Information provided successfully! You can now proceed to the next step.');
+      console.log('Additional Information Provided:', additionalInfo);
+    } else {
+      setValidationMessage('No additional information provided. You can still proceed or add information as needed.');
     }
-
-    if (additionalInfo.trim().length < 50) {
-      setValidationMessage('Please provide more detailed information (at least 50 characters).');
-      return;
-    }
-
-    setValidationMessage('Information validated successfully! You can now proceed to the next step.');
-    console.log('Additional Information Provided:', additionalInfo);
   };
 
   const handleNext = () => {
-    if (!additionalInfo.trim() || additionalInfo.trim().length < 50) {
-      setValidationMessage('Please validate your information before proceeding.');
-      return;
-    }
-
+    // Allow proceeding without validation or additional info
     console.log('Proceeding to next step with information:', additionalInfo);
-    navigate('/architecture');
+
+    // Pass additional information along with the API response
+    navigate('/architecture', {
+      state: {
+        ...location.state,
+        additionalInfo: additionalInfo
+      }
+    });
   };
 
   return (
@@ -117,10 +132,10 @@ function RequiredInformation() {
             </div>
             <div>
               <h2 className="text-xl font-medium text-gray-900 mb-1">
-                Missing Critical Details
+                Suggested Additional Details
               </h2>
               <p className="text-sm text-gray-600">
-                Please provide information for the following areas to proceed
+                Consider providing information for the following areas to enhance your technical specification
               </p>
             </div>
           </div>
@@ -169,10 +184,10 @@ function RequiredInformation() {
         {/* Input Section */}
         <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm mb-6">
           <label htmlFor="additionalInfo" className="block text-sm font-medium text-gray-900 mb-3">
-            Provide Additional Information <span className="text-red-500">*</span>
+            Provide Additional Information <span className="text-gray-500 font-normal">(Optional)</span>
           </label>
           <p className="text-sm text-gray-600 mb-4">
-            Please address the missing requirements listed above. Provide as much detail as possible to help us create an accurate technical specification.
+            Address any of the missing requirements listed above. The more detail you provide, the more accurate the technical specification will be. You can also proceed without filling this in.
           </p>
           <textarea
             id="additionalInfo"
@@ -186,7 +201,7 @@ function RequiredInformation() {
             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all resize-y"
           />
           <div className="mt-2 text-sm text-gray-500">
-            Minimum 50 characters required • {additionalInfo.length} characters
+            {additionalInfo.length} characters provided
           </div>
 
           {/* Validation Message */}

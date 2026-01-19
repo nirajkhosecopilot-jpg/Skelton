@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"os"
 
+	"skelton-api/config"
 	"skelton-api/handlers"
 	"skelton-api/middleware"
+	"skelton-api/services"
 
 	"github.com/gorilla/mux"
 )
@@ -22,8 +24,23 @@ func main() {
 	// Create router
 	router := mux.NewRouter()
 
+	// Initialize LLM service
+	llmConfig := config.GetLLMConfig()
+	var llmService *services.LLMService
+
+	if llmConfig.APIKey != "" {
+		llmService = services.NewLLMService(llmConfig)
+		log.Printf("LLM service initialized with provider: %s, model: %s", llmConfig.Provider, llmConfig.Model)
+	} else {
+		log.Println("Warning: LLM_API_KEY not set. Using static validation logic as fallback.")
+		log.Println("To enable LLM-based validation, set the following environment variables:")
+		log.Println("  - LLM_API_KEY: Your LLM provider API key")
+		log.Println("  - LLM_PROVIDER: openai or anthropic (default: openai)")
+		log.Println("  - LLM_MODEL: Model name (optional, uses provider default)")
+	}
+
 	// Initialize handlers
-	projectHandler := handlers.NewProjectHandler()
+	projectHandler := handlers.NewProjectHandler(llmService)
 
 	// Define routes
 	router.HandleFunc("/health", projectHandler.HandleHealth).Methods("GET")

@@ -37,10 +37,77 @@ type MissingField struct {
 	Reason      string   `json:"reason"`
 	Suggestions []string `json:"suggestions"`
 	Required    bool     `json:"required"`
+	Placeholder string   `json:"placeholder"` // Placeholder text for user to fill in
 }
 
-// ValidateProjectDescription validates the incoming project description
-// and returns a list of missing or incomplete information
+// LLMAssessmentResponse represents the response from LLM assessment
+type LLMAssessmentResponse struct {
+	MissingInformation     []LLMMissingField `json:"missingInformation"`
+	Recommendations        []string          `json:"recommendations"`
+	SuggestedTools         []string          `json:"suggestedTools"`
+	SecurityConsiderations []string          `json:"securityConsiderations"`
+	EstimatedEffort        string            `json:"estimatedEffort"`
+	Status                 string            `json:"status"`
+	Message                string            `json:"message"`
+}
+
+// LLMMissingField represents missing information from LLM
+type LLMMissingField struct {
+	Field       string   `json:"field"`
+	Reason      string   `json:"reason"`
+	Suggestions []string `json:"suggestions"`
+	Required    bool     `json:"required"`
+	Placeholder string   `json:"placeholder"`
+}
+
+// ValidateWithLLM validates the project description using an LLM service
+func (p *ProjectDescription) ValidateWithLLM(llmService LLMServiceInterface) MissingInformation {
+	// Try LLM-based validation first
+	if llmService != nil {
+		llmResponse, err := llmService.AssessProjectDescription(p)
+		if err == nil && llmResponse != nil {
+			return p.convertLLMResponse(llmResponse)
+		}
+		// If LLM fails, fall back to static validation
+	}
+
+	// Fallback to static validation
+	return p.Validate()
+}
+
+// LLMServiceInterface defines the interface for LLM service
+type LLMServiceInterface interface {
+	AssessProjectDescription(project *ProjectDescription) (*LLMAssessmentResponse, error)
+}
+
+// convertLLMResponse converts LLM response to MissingInformation format
+func (p *ProjectDescription) convertLLMResponse(llmResp *LLMAssessmentResponse) MissingInformation {
+	missingFields := make([]MissingField, 0, len(llmResp.MissingInformation))
+
+	for _, llmField := range llmResp.MissingInformation {
+		missingFields = append(missingFields, MissingField{
+			Field:       llmField.Field,
+			Reason:      llmField.Reason,
+			Suggestions: llmField.Suggestions,
+			Required:    llmField.Required,
+			Placeholder: llmField.Placeholder,
+		})
+	}
+
+	return MissingInformation{
+		Status:                 llmResp.Status,
+		Message:                llmResp.Message,
+		MissingFields:          missingFields,
+		Recommendations:        llmResp.Recommendations,
+		EstimatedEffort:        llmResp.EstimatedEffort,
+		SuggestedTools:         llmResp.SuggestedTools,
+		SecurityConsiderations: llmResp.SecurityConsiderations,
+		Timestamp:              time.Now(),
+	}
+}
+
+// Validate validates the incoming project description using static logic
+// This is kept as a fallback when LLM is not available
 func (p *ProjectDescription) Validate() MissingInformation {
 	missingInfo := MissingInformation{
 		Status:          "success",
