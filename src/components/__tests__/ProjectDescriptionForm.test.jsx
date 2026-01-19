@@ -14,6 +14,32 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
+// Mock API service
+vi.mock('../../services/api', () => ({
+  validateProjectDescription: vi.fn(() => Promise.resolve({
+    status: 'success',
+    message: 'Project description validated successfully',
+    missingFields: [],
+    recommendations: ['Test recommendation'],
+    suggestedTools: ['Test tool'],
+    securityConsiderations: ['Test security'],
+    estimatedEffort: '1-3 months',
+    timestamp: new Date().toISOString()
+  })),
+  transformFormDataForAPI: (formData) => ({
+    name: 'Test Project',
+    description: formData.projectDescription,
+    type: 'web',
+    technologyStack: [formData.backendFramework, formData.frontendFramework].filter(Boolean),
+    databaseType: formData.database,
+    authRequired: true,
+    deploymentPlatform: '',
+    features: [],
+    teamSize: 0,
+    timeline: ''
+  })
+}));
+
 // Helper to render component with router
 const renderWithRouter = (component) => {
   return render(<BrowserRouter>{component}</BrowserRouter>);
@@ -313,7 +339,9 @@ describe('ProjectDescriptionForm', () => {
       await user.click(screen.getByRole('button', { name: /Submit/i }));
 
       await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/required-information');
+        expect(mockNavigate).toHaveBeenCalledWith('/required-information', expect.objectContaining({
+          state: expect.any(Object)
+        }));
       });
     });
   });
@@ -333,7 +361,12 @@ describe('ProjectDescriptionForm', () => {
       await user.click(screen.getByRole('button', { name: /Submit/i }));
 
       await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/required-information');
+        expect(mockNavigate).toHaveBeenCalledWith('/required-information', expect.objectContaining({
+          state: expect.objectContaining({
+            formData: expect.any(Object),
+            apiResponse: expect.any(Object)
+          })
+        }));
       });
     });
 
@@ -386,7 +419,9 @@ describe('ProjectDescriptionForm', () => {
       await user.click(screen.getByRole('button', { name: /Submit/i }));
 
       await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/required-information');
+        expect(mockNavigate).toHaveBeenCalledWith('/required-information', expect.objectContaining({
+          state: expect.any(Object)
+        }));
       });
     });
 
@@ -403,7 +438,9 @@ describe('ProjectDescriptionForm', () => {
       await user.click(screen.getByRole('button', { name: /Submit/i }));
 
       await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/required-information');
+        expect(mockNavigate).toHaveBeenCalledWith('/required-information', expect.objectContaining({
+          state: expect.any(Object)
+        }));
       });
     });
   });
@@ -559,7 +596,9 @@ describe('ProjectDescriptionForm', () => {
       await user.click(screen.getByRole('button', { name: /Submit/i }));
 
       await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/required-information');
+        expect(mockNavigate).toHaveBeenCalledWith('/required-information', expect.objectContaining({
+          state: expect.any(Object)
+        }));
       });
     });
 
