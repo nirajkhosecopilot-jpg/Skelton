@@ -39,3 +39,8 @@ obj/
 .vs/
 .vscode/
 *.sln.docstates
+
+# Go
+Skelton.Api/skelton-api
+*.test
+*.out

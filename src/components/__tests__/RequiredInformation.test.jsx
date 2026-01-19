@@ -46,34 +46,29 @@ describe('RequiredInformation', () => {
       expect(backButton).toBeInTheDocument();
     });
 
-    it('should render all 7 required information items', () => {
+    it('should render default required information items when no API response', () => {
       renderWithRouter(<RequiredInformation />);
 
+      // Default fallback items when no API response is provided
       expect(screen.getByText(/Authentication & Authorization/i)).toBeInTheDocument();
       expect(screen.getByText(/API Design & Documentation/i)).toBeInTheDocument();
       expect(screen.getByText(/Data Models & Relationships/i)).toBeInTheDocument();
-      expect(screen.getByText(/Performance & Scalability Requirements/i)).toBeInTheDocument();
-      expect(screen.getByText(/Security & Compliance/i)).toBeInTheDocument();
-      expect(screen.getByText(/Testing Strategy/i)).toBeInTheDocument();
-      expect(screen.getByText(/Deployment & Infrastructure/i)).toBeInTheDocument();
     });
 
     it('should render required items with descriptions', () => {
       renderWithRouter(<RequiredInformation />);
 
+      // Check for default fallback descriptions
       expect(screen.getByText(/Specify authentication methods/i)).toBeInTheDocument();
       expect(screen.getByText(/Define REST\/GraphQL endpoints/i)).toBeInTheDocument();
       expect(screen.getByText(/Detail entity relationships/i)).toBeInTheDocument();
-      expect(screen.getByText(/Expected load, response time targets/i)).toBeInTheDocument();
-      expect(screen.getByText(/Data encryption requirements/i)).toBeInTheDocument();
-      expect(screen.getByText(/Unit testing framework/i)).toBeInTheDocument();
-      expect(screen.getByText(/Hosting platform/i)).toBeInTheDocument();
     });
 
-    it('should render numbered items from 1 to 7', () => {
+    it('should render numbered items from 1 to 3', () => {
       renderWithRouter(<RequiredInformation />);
 
-      for (let i = 1; i <= 7; i++) {
+      // Check for 3 default fallback items
+      for (let i = 1; i <= 3; i++) {
         expect(screen.getByText(i.toString())).toBeInTheDocument();
       }
     });

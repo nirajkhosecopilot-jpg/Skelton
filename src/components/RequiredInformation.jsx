@@ -1,56 +1,51 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function RequiredInformation() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [additionalInfo, setAdditionalInfo] = useState('');
   const [validationMessage, setValidationMessage] = useState('');
 
-  // Sample/dummy required information items
-  const requiredItems = [
-    {
-      id: 1,
-      title: 'Authentication & Authorization',
-      description: 'Specify authentication methods (OAuth, JWT, Session-based) and role-based access control requirements',
-      status: 'missing'
-    },
-    {
-      id: 2,
-      title: 'API Design & Documentation',
-      description: 'Define REST/GraphQL endpoints, API versioning strategy, and documentation standards (Swagger/OpenAPI)',
-      status: 'missing'
-    },
-    {
-      id: 3,
-      title: 'Data Models & Relationships',
-      description: 'Detail entity relationships, data schemas, migration strategy, and database indexing requirements',
-      status: 'missing'
-    },
-    {
-      id: 4,
-      title: 'Performance & Scalability Requirements',
-      description: 'Expected load, response time targets, caching strategy, and horizontal/vertical scaling plans',
-      status: 'missing'
-    },
-    {
-      id: 5,
-      title: 'Security & Compliance',
-      description: 'Data encryption requirements, compliance standards (GDPR, HIPAA), security audit needs',
-      status: 'missing'
-    },
-    {
-      id: 6,
-      title: 'Testing Strategy',
-      description: 'Unit testing framework, integration testing approach, E2E testing tools, and code coverage goals',
-      status: 'missing'
-    },
-    {
-      id: 7,
-      title: 'Deployment & Infrastructure',
-      description: 'Hosting platform (AWS, Azure, GCP), CI/CD pipeline, container orchestration, monitoring tools',
-      status: 'missing'
+  // Get API response from navigation state
+  const apiResponse = location.state?.apiResponse || null;
+
+  // Get required information from API response or use default
+  const getMissingFields = () => {
+    if (apiResponse && apiResponse.missingFields) {
+      return apiResponse.missingFields.map((field, index) => ({
+        id: index + 1,
+        title: field.field.charAt(0).toUpperCase() + field.field.slice(1).replace(/([A-Z])/g, ' $1'),
+        description: field.reason,
+        suggestions: field.suggestions,
+        required: field.required
+      }));
     }
-  ];
+
+    // Fallback to default items if no API response
+    return [
+      {
+        id: 1,
+        title: 'Authentication & Authorization',
+        description: 'Specify authentication methods (OAuth, JWT, Session-based) and role-based access control requirements',
+        required: true
+      },
+      {
+        id: 2,
+        title: 'API Design & Documentation',
+        description: 'Define REST/GraphQL endpoints, API versioning strategy, and documentation standards (Swagger/OpenAPI)',
+        required: true
+      },
+      {
+        id: 3,
+        title: 'Data Models & Relationships',
+        description: 'Detail entity relationships, data schemas, migration strategy, and database indexing requirements',
+        required: true
+      }
+    ];
+  };
+
+  const missingFields = getMissingFields();
 
   const handleValidate = () => {
     if (!additionalInfo.trim()) {
@@ -131,23 +126,40 @@ function RequiredInformation() {
           </div>
 
           <div className="space-y-4">
-            {requiredItems.map((item, index) => (
+            {missingFields.map((item, index) => (
               <div
                 key={item.id}
                 className="flex gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
               >
                 <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-6 h-6 rounded-full bg-white border-2 border-gray-300 flex items-center justify-center">
+                  <div className={`w-6 h-6 rounded-full bg-white border-2 flex items-center justify-center ${
+                    item.required ? 'border-red-400' : 'border-gray-300'
+                  }`}>
                     <span className="text-xs font-medium text-gray-600">{index + 1}</span>
                   </div>
                 </div>
                 <div className="flex-1">
                   <h3 className="text-base font-medium text-gray-900 mb-1">
-                    {item.title}
+                    {item.title} {item.required && <span className="text-red-500">*</span>}
                   </h3>
                   <p className="text-sm text-gray-600 leading-relaxed">
                     {item.description}
                   </p>
+                  {item.suggestions && item.suggestions.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-xs font-medium text-gray-700 mb-1">Suggestions:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {item.suggestions.map((suggestion, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-block px-2 py-1 text-xs bg-white border border-gray-300 rounded text-gray-700"
+                          >
+                            {suggestion}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -204,6 +216,71 @@ function RequiredInformation() {
             </div>
           )}
         </div>
+
+        {/* AI Recommendations and Insights */}
+        {apiResponse && (
+          <>
+            {/* Estimated Effort */}
+            {apiResponse.estimatedEffort && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 shadow-sm mb-6">
+                <h3 className="text-lg font-medium text-blue-900 mb-2">Estimated Project Effort</h3>
+                <p className="text-sm text-blue-800">{apiResponse.estimatedEffort}</p>
+              </div>
+            )}
+
+            {/* Recommendations */}
+            {apiResponse.recommendations && apiResponse.recommendations.length > 0 && (
+              <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-3">Recommendations</h3>
+                <ul className="space-y-2">
+                  {apiResponse.recommendations.map((rec, idx) => (
+                    <li key={idx} className="flex gap-2 text-sm text-gray-700">
+                      <span className="text-green-600 flex-shrink-0">✓</span>
+                      <span>{rec}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Suggested Tools */}
+            {apiResponse.suggestedTools && apiResponse.suggestedTools.length > 0 && (
+              <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-3">Suggested Tools</h3>
+                <div className="flex flex-wrap gap-2">
+                  {apiResponse.suggestedTools.map((tool, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-block px-3 py-1.5 text-sm bg-gray-100 border border-gray-300 rounded-lg text-gray-800"
+                    >
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Security Considerations */}
+            {apiResponse.securityConsiderations && apiResponse.securityConsiderations.length > 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 shadow-sm mb-6">
+                <div className="flex items-start gap-2 mb-3">
+                  <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <h3 className="text-lg font-medium text-amber-900">Security Considerations</h3>
+                </div>
+                <ul className="space-y-2">
+                  {apiResponse.securityConsiderations.map((consideration, idx) => (
+                    <li key={idx} className="flex gap-2 text-sm text-amber-800">
+                      <span className="text-amber-600 flex-shrink-0">🔒</span>
+                      <span>{consideration}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
+        )}
 
         {/* Action Buttons */}
         <div className="flex gap-4">

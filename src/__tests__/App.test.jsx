@@ -84,13 +84,10 @@ describe('App', () => {
     it('should render RequiredInformation with all required items', () => {
       renderWithRouter('/required-information');
 
+      // When no API response is provided, it shows default fallback items
       expect(screen.getByText(/Authentication & Authorization/i)).toBeInTheDocument();
       expect(screen.getByText(/API Design & Documentation/i)).toBeInTheDocument();
       expect(screen.getByText(/Data Models & Relationships/i)).toBeInTheDocument();
-      expect(screen.getByText(/Performance & Scalability Requirements/i)).toBeInTheDocument();
-      expect(screen.getByText(/Security & Compliance/i)).toBeInTheDocument();
-      expect(screen.getByText(/Testing Strategy/i)).toBeInTheDocument();
-      expect(screen.getByText(/Deployment & Infrastructure/i)).toBeInTheDocument();
     });
 
     it('should render Architecture with all form fields', () => {

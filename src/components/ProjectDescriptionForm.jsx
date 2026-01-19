@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { validateProjectDescription, transformFormDataForAPI } from '../services/api';
 
 function ProjectDescriptionForm() {
   const navigate = useNavigate();
@@ -13,6 +14,8 @@ function ProjectDescriptionForm() {
 
   const [errors, setErrors] = useState({});
   const [submittedData, setSubmittedData] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState(null);
 
   const backendOptions = [
     'Node.js (Express)',
@@ -108,7 +111,7 @@ function ProjectDescriptionForm() {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newErrors = validateForm();
@@ -118,14 +121,36 @@ function ProjectDescriptionForm() {
       return;
     }
 
-    // Store the submitted data
-    setSubmittedData(formData);
+    setIsSubmitting(true);
+    setApiError(null);
 
-    // Log to console (in production, this would be sent to backend)
-    console.log('Project Information Submitted:', formData);
+    try {
+      // Transform form data to API format
+      const apiData = transformFormDataForAPI(formData);
 
-    // Navigate to Required Information page
-    navigate('/required-information');
+      // Call the API to validate project description
+      const response = await validateProjectDescription(apiData);
+
+      // Store the submitted data
+      setSubmittedData(formData);
+
+      // Log to console
+      console.log('Project Information Submitted:', formData);
+      console.log('API Response:', response);
+
+      // Navigate to Required Information page with API response
+      navigate('/required-information', {
+        state: {
+          formData,
+          apiResponse: response
+        }
+      });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setApiError(error.message || 'Failed to connect to the API. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -287,18 +312,35 @@ function ProjectDescriptionForm() {
             <div className="flex gap-4 mt-8">
               <button
                 type="submit"
-                className="flex-1 bg-gray-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all"
+                disabled={isSubmitting}
+                className="flex-1 bg-gray-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Submit
+                {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
               <button
                 type="button"
                 onClick={handleReset}
-                className="flex-1 bg-white text-gray-900 px-6 py-3 rounded-lg font-medium border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all"
+                disabled={isSubmitting}
+                className="flex-1 bg-white text-gray-900 px-6 py-3 rounded-lg font-medium border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Reset
               </button>
             </div>
+
+            {/* API Error Display */}
+            {apiError && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-medium text-red-800">Error</p>
+                    <p className="text-sm text-red-700 mt-1">{apiError}</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </form>
 
