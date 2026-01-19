@@ -12,9 +12,17 @@ import (
 	"skelton-api/services"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// Load .env file if it exists (optional - won't error if file doesn't exist)
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found or unable to load. Using environment variables only.")
+	} else {
+		log.Println("Loaded configuration from .env file")
+	}
+
 	// Get port from environment variable or use default
 	port := os.Getenv("PORT")
 	if port == "" {

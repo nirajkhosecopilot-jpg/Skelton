@@ -187,6 +187,8 @@ cp .env.example .env
 # Edit .env with your API key
 ```
 
+The Go service will automatically load the `.env` file on startup using the `godotenv` package.
+
 **Note**: If `LLM_API_KEY` is not set, the API will automatically fall back to static validation logic.
 
 ## Integration with React UI
