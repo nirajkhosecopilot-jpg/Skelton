@@ -44,3 +44,4 @@ obj/
 Skelton.Api/skelton-api
 *.test
 *.out
+/Skelton.Api/.env
