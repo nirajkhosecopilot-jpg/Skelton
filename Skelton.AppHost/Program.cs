@@ -9,7 +9,6 @@ var backend = builder.AddDockerfile("backend", "../Skelton.Api")
 var frontend = builder.AddNpmApp("frontend", "../", "dev:aspire")
     .WithHttpEndpoint(port: 5173, env: "PORT")
     .WithReference(backend)
-    .WithEnvironment("VITE_API_URL", backend.GetEndpoint("http"))
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
 
