@@ -81,3 +81,64 @@ export function transformFormDataForAPI(formData) {
     timeline: '', // Can be added to the form
   };
 }
+
+/**
+ * Generates project specification using AI
+ * @param {Object} completeData - The complete project data from all pages
+ * @returns {Promise<Object>} - The AI-generated specification
+ */
+export async function generateProjectSpecification(completeData) {
+  try {
+    const response = await fetch(`${API_URL}/api/project/generate-specification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(completeData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `API request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error generating project specification:', error);
+    throw error;
+  }
+}
+
+/**
+ * Downloads document in specified format
+ * @param {string} format - The format (pdf, docx, jpg)
+ * @param {Object} projectData - The complete project data
+ * @param {Object} content - The AI-generated content
+ * @returns {Promise<Blob>} - The document blob
+ */
+export async function downloadDocument(format, projectData, content) {
+  try {
+    const response = await fetch(`${API_URL}/api/project/download-document`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        format,
+        projectData,
+        content
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Download failed with status ${response.status}`);
+    }
+
+    return await response.blob();
+  } catch (error) {
+    console.error('Error downloading document:', error);
+    throw error;
+  }
+}

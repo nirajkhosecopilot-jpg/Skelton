@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function Architecture() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [architectureData, setArchitectureData] = useState({
     pattern: '',
     deploymentStrategy: '',
@@ -120,7 +121,26 @@ function Architecture() {
     }
 
     console.log('Proceeding with architecture:', architectureData);
-    navigate('/architecture-overview');
+
+    // Get formData from previous pages
+    const previousFormData = location.state?.formData || {};
+
+    // Combine all data
+    const completeData = {
+      ...previousFormData,
+      architecturePattern: architectureData.pattern,
+      deploymentStrategy: architectureData.deploymentStrategy,
+      infrastructure: architectureData.infrastructure,
+      scalingApproach: architectureData.scalingApproach,
+      architecturalNotes: architectureData.additionalNotes
+    };
+
+    // Pass complete data to overview page
+    navigate('/architecture-overview', {
+      state: {
+        completeData
+      }
+    });
   };
 
   return (

@@ -1,186 +1,76 @@
-import { useNavigate } from 'react-router-dom';
-import { useState, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { generateProjectSpecification, downloadDocument } from '../services/api';
 
 const ArchitectureOverview = () => {
   const navigate = useNavigate();
-  const [downloadFormat, setDownloadFormat] = useState('txt');
-  const folderStructureRef = useRef(null);
+  const location = useLocation();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [aiContent, setAiContent] = useState(null);
+  const [completeData, setCompleteData] = useState(null);
+  const [downloadFormat, setDownloadFormat] = useState('pdf');
+  const [isDownloading, setIsDownloading] = useState(false);
 
-  // Recommended folder structure
-  const folderStructure = {
-    'project-root': {
-      type: 'folder',
-      children: {
-        'backend': {
-          type: 'folder',
-          description: 'Backend services and API',
-          children: {
-            'src': {
-              type: 'folder',
-              children: {
-                'controllers': { type: 'folder', description: 'API route controllers' },
-                'models': { type: 'folder', description: 'Data models and schemas' },
-                'services': { type: 'folder', description: 'Business logic layer' },
-                'middlewares': { type: 'folder', description: 'Express/HTTP middlewares' },
-                'routes': { type: 'folder', description: 'API route definitions' },
-                'config': { type: 'folder', description: 'Configuration files' },
-                'utils': { type: 'folder', description: 'Helper utilities' }
-              }
-            },
-            'tests': { type: 'folder', description: 'Backend test suites' },
-            'package.json': { type: 'file' },
-            '.env': { type: 'file', description: 'Environment variables' }
-          }
-        },
-        'frontend': {
-          type: 'folder',
-          description: 'Client-side application',
-          children: {
-            'src': {
-              type: 'folder',
-              children: {
-                'components': { type: 'folder', description: 'React components' },
-                'pages': { type: 'folder', description: 'Page components' },
-                'hooks': { type: 'folder', description: 'Custom React hooks' },
-                'contexts': { type: 'folder', description: 'React context providers' },
-                'services': { type: 'folder', description: 'API client services' },
-                'utils': { type: 'folder', description: 'Utility functions' },
-                'assets': { type: 'folder', description: 'Images, fonts, static files' },
-                'styles': { type: 'folder', description: 'CSS/styling files' }
-              }
-            },
-            'public': { type: 'folder', description: 'Static public assets' },
-            'tests': { type: 'folder', description: 'Frontend test suites' },
-            'package.json': { type: 'file' },
-            'vite.config.js': { type: 'file', description: 'Build configuration' }
-          }
-        },
-        'database': {
-          type: 'folder',
-          description: 'Database schemas and migrations',
-          children: {
-            'migrations': { type: 'folder', description: 'Database migration scripts' },
-            'seeds': { type: 'folder', description: 'Seed data for development' },
-            'schemas': { type: 'folder', description: 'Database schema definitions' },
-            'scripts': { type: 'folder', description: 'Database utility scripts' }
-          }
-        },
-        'messaging': {
-          type: 'folder',
-          description: 'Message queue configurations',
-          children: {
-            'consumers': { type: 'folder', description: 'Message consumers/subscribers' },
-            'producers': { type: 'folder', description: 'Message producers/publishers' },
-            'configs': { type: 'folder', description: 'Queue configurations' },
-            'handlers': { type: 'folder', description: 'Message handler logic' }
-          }
-        },
-        'shared': {
-          type: 'folder',
-          description: 'Shared code across services',
-          children: {
-            'types': { type: 'folder', description: 'TypeScript types/interfaces' },
-            'constants': { type: 'folder', description: 'Shared constants' },
-            'utils': { type: 'folder', description: 'Shared utility functions' }
-          }
-        },
-        'docker': {
-          type: 'folder',
-          description: 'Docker configurations',
-          children: {
-            'Dockerfile.backend': { type: 'file' },
-            'Dockerfile.frontend': { type: 'file' },
-            'docker-compose.yml': { type: 'file' }
-          }
-        },
-        'docs': { type: 'folder', description: 'Project documentation' },
-        '.github': {
-          type: 'folder',
-          description: 'GitHub workflows and templates',
-          children: {
-            'workflows': { type: 'folder', description: 'CI/CD workflows' }
-          }
-        },
-        'README.md': { type: 'file' },
-        '.gitignore': { type: 'file' },
-        'package.json': { type: 'file', description: 'Root package file (monorepo)' }
-      }
+  // Get complete data from navigation state
+  useEffect(() => {
+    const data = location.state?.completeData;
+    if (!data) {
+      setError('No project data available. Please start from the beginning.');
+      setIsLoading(false);
+      return;
+    }
+
+    setCompleteData(data);
+    generateSpec(data);
+  }, [location.state]);
+
+  const generateSpec = async (data) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      console.log('Generating specification with data:', data);
+      const result = await generateProjectSpecification(data);
+      console.log('Received AI content:', result);
+      setAiContent(result);
+    } catch (err) {
+      console.error('Error generating specification:', err);
+      setError(err.message || 'Failed to generate specification. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Convert structure to text format
-  const structureToText = (obj, prefix = '') => {
-    let result = '';
-    const entries = Object.entries(obj);
+  const handleDownload = async () => {
+    if (!aiContent || !completeData) {
+      return;
+    }
 
-    entries.forEach(([key, value], index) => {
-      const isLastItem = index === entries.length - 1;
-      const connector = isLastItem ? '└── ' : '├── ';
-      const extension = isLastItem ? '    ' : '│   ';
-
-      if (key === 'type' || key === 'description') return;
-
-      const icon = value.type === 'folder' ? '📁' : '📄';
-      const description = value.description ? ` - ${value.description}` : '';
-
-      result += `${prefix}${connector}${icon} ${key}${description}\n`;
-
-      if (value.children) {
-        result += structureToText(value.children, prefix + extension);
-      }
-    });
-
-    return result;
-  };
-
-  // Convert structure to JSON
-  const structureToJSON = () => {
-    return JSON.stringify(folderStructure, null, 2);
-  };
-
-  // Generate downloadable content
-  const generateDownloadContent = () => {
-    const header = `# Recommended Project Architecture\n# Full-Stack Application Structure\n\n`;
-    const textContent = structureToText(folderStructure);
-
-    switch (downloadFormat) {
-      case 'txt':
-        return header + textContent;
-      case 'json':
-        return structureToJSON();
-      case 'md':
-        return `# Recommended Project Architecture\n\n## Full-Stack Application Structure\n\n\`\`\`\n${textContent}\`\`\`\n\n## Description\n\nThis architecture supports a full-stack application with:\n- **Backend**: RESTful API services\n- **Frontend**: Modern React application\n- **Database**: Schema management and migrations\n- **Messaging**: Message queue framework integration\n- **Shared**: Common code and utilities\n- **Docker**: Containerization support\n`;
-      default:
-        return textContent;
+    setIsDownloading(true);
+    try {
+      const blob = await downloadDocument(downloadFormat, completeData, aiContent);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `project-specification.${downloadFormat}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error downloading document:', err);
+      setError(`Failed to download document: ${err.message}`);
+    } finally {
+      setIsDownloading(false);
     }
   };
 
-  // Download as file
-  const handleDownload = () => {
-    const content = generateDownloadContent();
-    const mimeTypes = {
-      txt: 'text/plain',
-      json: 'application/json',
-      md: 'text/markdown'
-    };
+  const renderFolderTree = (tree, level = 0) => {
+    if (!tree || tree.length === 0) return null;
 
-    const blob = new Blob([content], { type: mimeTypes[downloadFormat] });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `architecture-overview.${downloadFormat}`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
-  // Render folder structure recursively
-  const renderStructure = (obj, level = 0) => {
-    return Object.entries(obj).map(([key, value]) => {
-      if (key === 'type' || key === 'description') return null;
-
-      const isFolder = value.type === 'folder';
+    return tree.map((node, index) => {
+      const isFolder = node.type === 'folder';
       const icon = isFolder ? (
         <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
           <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
@@ -192,7 +82,7 @@ const ArchitectureOverview = () => {
       );
 
       return (
-        <div key={key} className="group">
+        <div key={`${node.name}-${index}`} className="group">
           <div
             className="flex items-start gap-2 py-1.5 px-3 rounded hover:bg-gray-50 transition-colors"
             style={{ marginLeft: `${level * 24}px` }}
@@ -201,25 +91,63 @@ const ArchitectureOverview = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className={`font-medium ${isFolder ? 'text-gray-900' : 'text-gray-600'}`}>
-                  {key}
+                  {node.name}
                 </span>
-                {value.description && (
+                {node.description && (
                   <span className="text-xs text-gray-500 truncate">
-                    {value.description}
+                    {node.description}
                   </span>
                 )}
               </div>
             </div>
           </div>
-          {value.children && (
+          {node.children && node.children.length > 0 && (
             <div className="mt-1">
-              {renderStructure(value.children, level + 1)}
+              {renderFolderTree(node.children, level + 1)}
             </div>
           )}
         </div>
       );
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
+          <p className="text-lg text-gray-700">
+            {completeData?.mode === 'offline'
+              ? 'Generating specification using local OLLAMA...'
+              : 'Generating specification using Claude AI...'}
+          </p>
+          <p className="text-sm text-gray-500 mt-2">This may take a few moments</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !completeData) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center">
+          <div className="text-red-600 mb-4">
+            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-medium text-gray-900 mb-2">Error</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Start Over
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -248,125 +176,174 @@ const ArchitectureOverview = () => {
             Back to Architecture
           </button>
 
-          <h1 className="text-4xl font-light text-gray-900 mb-3">
-            Architecture Overview
-          </h1>
-          <p className="text-gray-600 text-lg">
-            Recommended folder structure for a full-stack application with backend, frontend, database, and message queuing framework.
-          </p>
-        </div>
-
-        {/* Key Features */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {[
-            { title: 'Backend', icon: '⚙️', desc: 'API & Services' },
-            { title: 'Frontend', icon: '🎨', desc: 'React UI' },
-            { title: 'Database', icon: '🗄️', desc: 'Schemas & Migrations' },
-            { title: 'Messaging', icon: '📨', desc: 'Queue Framework' }
-          ].map((item, index) => (
-            <div
-              key={index}
-              className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="text-3xl mb-2">{item.icon}</div>
-              <div className="font-medium text-gray-900">{item.title}</div>
-              <div className="text-sm text-gray-500">{item.desc}</div>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-light text-gray-900 mb-3">
+                Architecture Overview
+              </h1>
+              <p className="text-gray-600 text-lg">
+                {completeData?.mode === 'offline'
+                  ? 'AI-generated specification using local OLLAMA'
+                  : 'AI-generated specification using Claude AI'}
+              </p>
             </div>
-          ))}
-        </div>
-
-        {/* Folder Structure Visualization */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
-          <div className="border-b border-gray-200 px-6 py-4">
-            <h2 className="text-xl font-medium text-gray-900">
-              Folder Structure
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Expandable tree view of the recommended project architecture
-            </p>
-          </div>
-
-          <div
-            ref={folderStructureRef}
-            className="p-6 bg-gray-50 font-mono text-sm overflow-x-auto max-h-[600px] overflow-y-auto"
-          >
-            {renderStructure(folderStructure)}
-          </div>
-        </div>
-
-        {/* Download Section */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-medium text-gray-900 mb-4">
-            Download Structure
-          </h2>
-          <p className="text-sm text-gray-600 mb-6">
-            Export the folder structure in your preferred format
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Format Selection */}
-            <div className="flex-1">
-              <label htmlFor="downloadFormat" className="block text-sm font-medium text-gray-700 mb-2">
-                Select Format
-              </label>
-              <select
-                id="downloadFormat"
-                value={downloadFormat}
-                onChange={(e) => setDownloadFormat(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
-              >
-                <option value="txt">Text File (.txt)</option>
-                <option value="json">JSON (.json)</option>
-                <option value="md">Markdown (.md)</option>
-              </select>
-            </div>
-
-            {/* Download Button */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
-              <button
-                type="button"
-                onClick={handleDownload}
-                className="px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all font-medium"
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <div className="text-sm text-gray-500">
+              {aiContent?.status === 'success' && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  Download
+                  Generated
                 </span>
-              </button>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Architecture Notes */}
-        <div className="mt-8 bg-gray-50 border border-gray-200 rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-3">
-            Architecture Notes
-          </h3>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li className="flex items-start gap-2">
-              <span className="text-gray-400 mt-0.5">•</span>
-              <span><strong>Monorepo structure:</strong> All services in one repository for easier dependency management</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-gray-400 mt-0.5">•</span>
-              <span><strong>Separation of concerns:</strong> Clear boundaries between frontend, backend, and infrastructure</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-gray-400 mt-0.5">•</span>
-              <span><strong>Shared code:</strong> Common types, constants, and utilities accessible to all services</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-gray-400 mt-0.5">•</span>
-              <span><strong>Scalability:</strong> Structure supports microservices migration when needed</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-gray-400 mt-0.5">•</span>
-              <span><strong>DevOps ready:</strong> Docker configurations and CI/CD workflow templates included</span>
-            </li>
-          </ul>
-        </div>
+        {/* Error Display */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-start gap-2">
+              <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="text-sm font-medium text-red-800">Error</p>
+                <p className="text-sm text-red-700 mt-1">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {aiContent && (
+          <>
+            {/* Project Overview */}
+            {aiContent.technicalSpecification?.projectOverview && (
+              <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
+                <h2 className="text-2xl font-medium text-gray-900 mb-4">
+                  {aiContent.technicalSpecification.projectOverview.title}
+                </h2>
+                <p className="text-gray-700 mb-4">
+                  {aiContent.technicalSpecification.projectOverview.description}
+                </p>
+                {aiContent.technicalSpecification.projectOverview.goals && aiContent.technicalSpecification.projectOverview.goals.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="text-sm font-medium text-gray-900 mb-2">Goals:</h3>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+                      {aiContent.technicalSpecification.projectOverview.goals.map((goal, index) => (
+                        <li key={index}>{goal}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Folder Structure */}
+            {aiContent.folderStructure && (
+              <div className="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+                <div className="border-b border-gray-200 px-6 py-4">
+                  <h2 className="text-xl font-medium text-gray-900">
+                    Folder Structure
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {aiContent.folderStructure.rootFolder || 'Project structure'}
+                  </p>
+                </div>
+
+                <div className="p-6 bg-gray-50 font-mono text-sm overflow-x-auto max-h-[600px] overflow-y-auto">
+                  {renderFolderTree(aiContent.folderStructure.tree)}
+                </div>
+              </div>
+            )}
+
+            {/* System Architecture */}
+            {aiContent.technicalSpecification?.systemArchitecture && (
+              <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
+                <h2 className="text-xl font-medium text-gray-900 mb-4">
+                  System Architecture
+                </h2>
+                <p className="text-sm text-gray-600 mb-4">
+                  <strong>Pattern:</strong> {aiContent.technicalSpecification.systemArchitecture.pattern}
+                </p>
+                <p className="text-gray-700 mb-4">
+                  {aiContent.technicalSpecification.systemArchitecture.description}
+                </p>
+                {aiContent.technicalSpecification.systemArchitecture.components && aiContent.technicalSpecification.systemArchitecture.components.length > 0 && (
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {aiContent.technicalSpecification.systemArchitecture.components.map((component, index) => (
+                      <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <h3 className="font-medium text-gray-900 mb-1">{component.name}</h3>
+                        <p className="text-xs text-gray-500 mb-2">{component.type}</p>
+                        <p className="text-sm text-gray-600">{component.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Download Section */}
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-medium text-gray-900 mb-4">
+                Download Specification
+              </h2>
+              <p className="text-sm text-gray-600 mb-6">
+                Export the complete project specification in your preferred format
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label htmlFor="downloadFormat" className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Format
+                  </label>
+                  <select
+                    id="downloadFormat"
+                    value={downloadFormat}
+                    onChange={(e) => setDownloadFormat(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                  >
+                    <option value="pdf">PDF Document (.pdf)</option>
+                    <option value="docx">Word Document (.docx)</option>
+                    <option value="jpg">Image (.jpg)</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
+                  <button
+                    type="button"
+                    onClick={handleDownload}
+                    disabled={isDownloading}
+                    className="px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      {isDownloading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                          Downloading...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Download
+                        </>
+                      )}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Success Message */}
+            {aiContent.message && (
+              <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-sm text-green-800">{aiContent.message}</p>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

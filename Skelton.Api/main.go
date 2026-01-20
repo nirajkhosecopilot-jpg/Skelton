@@ -8,6 +8,7 @@ import (
 
 	"skelton-api/handlers"
 	"skelton-api/middleware"
+	"skelton-api/services"
 
 	"github.com/gorilla/mux"
 )
@@ -21,6 +22,16 @@ func main() {
 
 	// Create router
 	router := mux.NewRouter()
+
+	// Initialize OLLAMA service and start if needed
+	log.Println("Initializing OLLAMA service...")
+	ollamaService := services.NewOllamaService()
+	if err := ollamaService.StartOllama(); err != nil {
+		log.Printf("Warning: Failed to start OLLAMA: %v", err)
+		log.Println("OLLAMA offline mode will not be available. Please ensure OLLAMA is installed and accessible.")
+	} else {
+		log.Println("OLLAMA service initialized successfully")
+	}
 
 	// Initialize handlers
 	projectHandler := handlers.NewProjectHandler()

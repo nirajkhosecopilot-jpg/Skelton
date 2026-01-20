@@ -15,6 +15,7 @@ import (
 // EnhancedProjectHandler handles enhanced project processing with AI
 type EnhancedProjectHandler struct {
 	aiService       *services.AIService
+	ollamaService   *services.OllamaService
 	documentService *services.DocumentService
 	imageService    *services.ImageService
 	cache           map[string]*CachedContent
@@ -33,6 +34,7 @@ type CachedContent struct {
 func NewEnhancedProjectHandler() *EnhancedProjectHandler {
 	handler := &EnhancedProjectHandler{
 		aiService:       services.NewAIService(),
+		ollamaService:   services.NewOllamaService(),
 		documentService: services.NewDocumentService(),
 		imageService:    services.NewImageService(),
 		cache:           make(map[string]*CachedContent),
@@ -88,9 +90,24 @@ func (h *EnhancedProjectHandler) HandleGenerateSpecification(w http.ResponseWrit
 		return
 	}
 
-	// Generate new content using AI
-	log.Println("Generating new content using AI...")
-	aiContent, err := h.aiService.GenerateProjectSpecification(projectData)
+	// Generate new content using AI (choose service based on mode)
+	var aiContent *models.AIGeneratedContent
+	var err error
+
+	// Check if mode is specified in the project data (default to online)
+	mode := "online" // default
+	if projectData.Mode != "" {
+		mode = projectData.Mode
+	}
+
+	if mode == "offline" {
+		log.Println("Generating new content using OLLAMA (offline mode)...")
+		aiContent, err = h.ollamaService.GenerateProjectSpecification(projectData)
+	} else {
+		log.Println("Generating new content using Claude AI (online mode)...")
+		aiContent, err = h.aiService.GenerateProjectSpecification(projectData)
+	}
+
 	if err != nil {
 		log.Printf("Error generating specification: %v", err)
 		http.Error(w, "Failed to generate specification: "+err.Error(), http.StatusInternalServerError)
