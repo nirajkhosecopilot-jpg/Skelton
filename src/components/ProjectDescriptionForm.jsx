@@ -9,7 +9,8 @@ function ProjectDescriptionForm() {
     backendFramework: '',
     frontendFramework: '',
     database: '',
-    messagingQueue: ''
+    messagingQueue: '',
+    mode: 'online' // 'online' or 'offline'
   });
 
   const [errors, setErrors] = useState({});
@@ -81,6 +82,13 @@ function ProjectDescriptionForm() {
         [name]: ''
       }));
     }
+  };
+
+  const handleModeToggle = () => {
+    setFormData(prev => ({
+      ...prev,
+      mode: prev.mode === 'online' ? 'offline' : 'online'
+    }));
   };
 
   const validateForm = () => {
@@ -159,7 +167,8 @@ function ProjectDescriptionForm() {
       backendFramework: '',
       frontendFramework: '',
       database: '',
-      messagingQueue: ''
+      messagingQueue: '',
+      mode: 'online'
     });
     setErrors({});
     setSubmittedData(null);
@@ -210,6 +219,42 @@ function ProjectDescriptionForm() {
               {errors.projectDescription && (
                 <p className="text-red-500 text-sm mt-2">{errors.projectDescription}</p>
               )}
+            </div>
+
+            {/* Online/Offline Mode Toggle */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-900 mb-3">
+                AI Mode <span className="text-red-500">*</span>
+              </label>
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleModeToggle}
+                      className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 ${
+                        formData.mode === 'online' ? 'bg-blue-600' : 'bg-gray-400'
+                      }`}
+                      role="switch"
+                      aria-checked={formData.mode === 'online'}
+                    >
+                      <span
+                        className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                          formData.mode === 'online' ? 'translate-x-9' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                    <span className="text-sm font-medium text-gray-900">
+                      {formData.mode === 'online' ? 'Online (Claude API)' : 'Offline (OLLAMA Local)'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-2 ml-20">
+                    {formData.mode === 'online'
+                      ? 'Using Claude AI API for generation (requires API key)'
+                      : 'Using local OLLAMA with llama3.3:latest (no API key needed)'}
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Backend Framework */}

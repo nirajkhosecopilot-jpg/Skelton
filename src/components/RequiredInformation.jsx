@@ -69,7 +69,19 @@ function RequiredInformation() {
     }
 
     console.log('Proceeding to next step with information:', additionalInfo);
-    navigate('/architecture');
+
+    // Get formData from previous page
+    const formData = location.state?.formData || {};
+
+    // Pass all data forward including additionalInfo
+    navigate('/architecture', {
+      state: {
+        formData: {
+          ...formData,
+          additionalInfo
+        }
+      }
+    });
   };
 
   return (

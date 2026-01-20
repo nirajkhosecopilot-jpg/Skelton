@@ -10,6 +10,7 @@ type CompleteProjectData struct {
 	FrontendFramework  string `json:"frontendFramework"`
 	DatabasePreference string `json:"databasePreference"`
 	MessagingQueue     string `json:"messagingQueue"`
+	Mode               string `json:"mode"` // "online" or "offline"
 
 	// Page 2 - Required Information
 	AdditionalInfo string `json:"additionalInfo"`
