@@ -9,6 +9,10 @@ A Go backend API service for the Skelton project that validates project descript
 - **Intelligent Recommendations**: Provides technology and architecture recommendations
 - **Security Considerations**: Suggests security best practices based on project type
 - **Effort Estimation**: Estimates project timeline based on requirements
+- **AI-Powered Specification Generation**: Uses Claude AI to generate comprehensive project specifications
+- **Folder Structure Generation**: Creates detailed project folder structures using AI
+- **Technical Documentation**: Generates complete technical specification documents
+- **Multi-Format Downloads**: Supports PDF, DOCX, and JPG format downloads
 - **ASPIRE Integration**: Integrated with .NET Aspire for orchestration and observability
 
 ## API Endpoints
@@ -55,6 +59,93 @@ Validates a project description and returns missing information and recommendati
 }
 ```
 
+### Generate AI-Powered Specification
+```
+POST /api/project/generate-specification
+```
+Generates comprehensive project specification including folder structure and technical documentation using Claude AI.
+
+**Request Body:**
+```json
+{
+  "projectDescription": "A web application for...",
+  "backendFramework": "Go",
+  "frontendFramework": "React",
+  "databasePreference": "PostgreSQL",
+  "messagingQueue": "RabbitMQ",
+  "additionalInfo": "Additional requirements or constraints",
+  "architecturePattern": "Microservices",
+  "deploymentStrategy": "Blue-Green",
+  "infrastructure": "AWS",
+  "scalingApproach": "Horizontal",
+  "architecturalNotes": "Optional additional notes"
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "AI-generated project specification completed successfully",
+  "folderStructure": {
+    "rootFolder": "project-name",
+    "tree": [...],
+    "metadata": {...}
+  },
+  "technicalSpecification": {
+    "projectOverview": {...},
+    "systemArchitecture": {...},
+    "technologyStack": {...},
+    "dataManagement": {...},
+    "securityStrategy": {...},
+    "deploymentPlan": {...},
+    "developmentGuidelines": {...},
+    "testingStrategy": {...},
+    "monitoringAndLogging": {...}
+  },
+  "timestamp": "2026-01-20T..."
+}
+```
+
+### Download Document
+```
+POST /api/project/download-document
+```
+Downloads the generated specification in PDF, DOCX, or JPG format.
+
+**Request Body:**
+```json
+{
+  "format": "pdf",
+  "projectData": {...},
+  "content": {...}
+}
+```
+
+**Supported Formats:**
+- `pdf` - Technical specification as PDF document
+- `docx` - Technical specification as DOCX document
+- `jpg` - Visual representation of folder structure and architecture
+
+**Response:** Binary file download
+
+### Get Cached Content
+```
+POST /api/project/get-cached-content
+```
+Retrieves previously generated specification from cache (valid for 1 hour).
+
+**Request Body:**
+```json
+{
+  "projectDescription": "...",
+  "backendFramework": "...",
+  ...
+}
+```
+
+**Response:** Same as Generate Specification endpoint
+
 ## Running Locally
 
 ### Prerequisites
@@ -90,16 +181,22 @@ Access the Aspire dashboard at `https://localhost:17219`
 ### Project Structure
 ```
 Skelton.Api/
-├── main.go              # Entry point and server setup
-├── handlers/            # HTTP request handlers
-│   └── project_handler.go
-├── models/              # Data models and validation logic
-│   └── project.go
-├── middleware/          # HTTP middleware
-│   └── cors.go
-├── go.mod               # Go module definition
-├── Dockerfile           # Container build instructions
-└── README.md            # This file
+├── main.go                        # Entry point and server setup
+├── handlers/                      # HTTP request handlers
+│   ├── project_handler.go        # Basic project validation
+│   └── enhanced_project_handler.go # AI-powered specification generation
+├── models/                        # Data models and validation logic
+│   ├── project.go                # Basic project models
+│   └── enhanced_project.go       # Enhanced project models for AI
+├── services/                      # Business logic services
+│   ├── ai_service.go             # Claude AI integration
+│   ├── document_service.go       # PDF/DOCX generation
+│   └── image_service.go          # JPG image generation
+├── middleware/                    # HTTP middleware
+│   └── cors.go                   # CORS and logging
+├── go.mod                         # Go module definition
+├── Dockerfile                     # Container build instructions
+└── README.md                      # This file
 ```
 
 ### Adding New Endpoints
@@ -128,6 +225,9 @@ curl -X POST http://localhost:8080/api/project/validate \
 ## Environment Variables
 
 - `PORT`: Server port (default: 8080)
+- `ANTHROPIC_API_KEY`: API key for Claude AI (required for AI-powered features)
+  - Get your API key from: https://console.anthropic.com/
+  - Example: `export ANTHROPIC_API_KEY=sk-ant-...`
 
 ## Integration with React UI
 
