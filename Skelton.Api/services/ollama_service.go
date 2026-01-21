@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -14,21 +15,34 @@ import (
 )
 
 const (
-	ollamaAPIURL = "http://localhost:11434/api/generate"
-	ollamaModel  = "llama3.3:latest"
+	defaultOllamaAPIURL = "http://localhost:11434"
+	ollamaModel         = "llama3.3:latest"
 )
 
 // OllamaService handles interactions with local OLLAMA
 type OllamaService struct {
 	httpClient *http.Client
+	baseURL    string
 }
 
 // NewOllamaService creates a new OLLAMA service instance
 func NewOllamaService() *OllamaService {
+	// Get OLLAMA base URL from environment or use default
+	baseURL := os.Getenv("OLLAMA_API_URL")
+	if baseURL == "" {
+		baseURL = defaultOllamaAPIURL
+	}
+
+	// Remove trailing slash if present
+	baseURL = strings.TrimSuffix(baseURL, "/")
+
+	fmt.Printf("OLLAMA service configured with base URL: %s\n", baseURL)
+
 	return &OllamaService{
 		httpClient: &http.Client{
 			Timeout: 300 * time.Second, // Longer timeout for local LLM
 		},
+		baseURL: baseURL,
 	}
 }
 
@@ -49,7 +63,8 @@ type OllamaResponse struct {
 
 // IsOllamaRunning checks if OLLAMA is running
 func (s *OllamaService) IsOllamaRunning() bool {
-	req, err := http.NewRequest("GET", "http://localhost:11434/api/tags", nil)
+	url := fmt.Sprintf("%s/api/tags", s.baseURL)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return false
 	}
@@ -98,7 +113,8 @@ func (s *OllamaService) EnsureModelExists() error {
 	fmt.Printf("Checking if model %s exists...\n", ollamaModel)
 
 	// Check if model exists
-	req, err := http.NewRequest("GET", "http://localhost:11434/api/tags", nil)
+	url := fmt.Sprintf("%s/api/tags", s.baseURL)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
@@ -172,7 +188,8 @@ func (s *OllamaService) GenerateProjectSpecification(projectData models.Complete
 	}
 
 	// Create HTTP request
-	req, err := http.NewRequest("POST", ollamaAPIURL, bytes.NewBuffer(reqBody))
+	generateURL := fmt.Sprintf("%s/api/generate", s.baseURL)
+	req, err := http.NewRequest("POST", generateURL, bytes.NewBuffer(reqBody))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}

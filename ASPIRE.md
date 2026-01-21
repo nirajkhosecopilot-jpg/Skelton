@@ -104,16 +104,79 @@ Skelton/
 
 ## Configuration
 
+### Environment Variables
+
+The backend API requires certain environment variables to be configured:
+
+#### Required Environment Variables
+
+**ANTHROPIC_API_KEY** - API key for Claude AI (Online Mode)
+- Required for: Online mode with Claude AI
+- Get your key at: https://console.anthropic.com/
+- Format: `sk-ant-...`
+
+**OLLAMA_API_URL** - URL for OLLAMA local instance (Offline Mode)
+- Default: `http://localhost:11434` (or `http://host.docker.internal:11434` in Docker)
+- Required for: Offline mode with OLLAMA
+- Only needed if OLLAMA is running on a non-default port or remote host
+
+#### Setting Environment Variables
+
+**Option 1: User Secrets (Recommended for local development)**
+
+```bash
+cd Skelton.AppHost
+dotnet user-secrets set "ANTHROPIC_API_KEY" "sk-ant-your-api-key-here"
+dotnet user-secrets set "OLLAMA_API_URL" "http://localhost:11434"
+```
+
+**Option 2: Environment Variables (System-wide)**
+
+```bash
+# Linux/macOS
+export ANTHROPIC_API_KEY="sk-ant-your-api-key-here"
+export OLLAMA_API_URL="http://localhost:11434"
+
+# Windows (PowerShell)
+$env:ANTHROPIC_API_KEY="sk-ant-your-api-key-here"
+$env:OLLAMA_API_URL="http://localhost:11434"
+
+# Windows (Command Prompt)
+set ANTHROPIC_API_KEY=sk-ant-your-api-key-here
+set OLLAMA_API_URL=http://localhost:11434
+```
+
+**Option 3: appsettings.json (Not recommended for secrets)**
+
+Edit `Skelton.AppHost/appsettings.json`:
+
+```json
+{
+  "ANTHROPIC_API_KEY": "sk-ant-your-api-key-here",
+  "OLLAMA_API_URL": "http://localhost:11434"
+}
+```
+
+> **Security Warning**: Never commit API keys to version control. Use user secrets or environment variables for sensitive data.
+
 ### Aspire AppHost Configuration
 
-The `Program.cs` in `Skelton.AppHost` configures the React application:
+The `Program.cs` in `Skelton.AppHost` configures both the backend API and React frontend:
 
 ```csharp
 var builder = DistributedApplication.CreateBuilder(args);
 
+// Add the Go backend API
+var backend = builder.AddDockerfile("backend", "../Skelton.Api")
+    .WithHttpEndpoint(port: 8080, targetPort: 8080, env: "PORT")
+    .WithEnvironment("ANTHROPIC_API_KEY", builder.Configuration["ANTHROPIC_API_KEY"] ?? "")
+    .WithEnvironment("OLLAMA_API_URL", builder.Configuration["OLLAMA_API_URL"] ?? "http://host.docker.internal:11434")
+    .WithExternalHttpEndpoints();
+
 // Add the React frontend application
-var frontend = builder.AddNpmApp("frontend", "../", "dev")
+var frontend = builder.AddNpmApp("frontend", "../", "dev:aspire")
     .WithHttpEndpoint(port: 5173, env: "PORT")
+    .WithEnvironment("VITE_API_URL", backend.GetEndpoint("http"))
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
 
@@ -258,6 +321,61 @@ export default defineConfig({
 ```
 
 Then update `Skelton.AppHost/Program.cs` accordingly.
+
+### Issue: Claude API Not Working (Online Mode)
+
+**Error**: `ANTHROPIC_API_KEY not configured` or API calls failing
+
+**Solution**: Set the ANTHROPIC_API_KEY environment variable:
+
+```bash
+# Using user secrets (recommended)
+cd Skelton.AppHost
+dotnet user-secrets set "ANTHROPIC_API_KEY" "sk-ant-your-api-key-here"
+
+# Or set environment variable before running
+export ANTHROPIC_API_KEY="sk-ant-your-api-key-here"  # Linux/macOS
+$env:ANTHROPIC_API_KEY="sk-ant-your-api-key-here"    # Windows PowerShell
+
+# Then run Aspire
+dotnet run
+```
+
+### Issue: OLLAMA Not Connecting (Offline Mode)
+
+**Error**: `OLLAMA is not running` or connection timeout
+
+**Solutions**:
+
+1. **OLLAMA not installed or not running**:
+   ```bash
+   # Install OLLAMA from https://ollama.ai/
+
+   # Start OLLAMA service
+   ollama serve
+
+   # Pull the required model
+   ollama pull llama3.3:latest
+   ```
+
+2. **Docker networking issue** (when backend runs in Docker):
+
+   The backend uses `host.docker.internal` to reach the host machine from Docker. If this doesn't work:
+
+   ```bash
+   # Option 1: Set custom OLLAMA URL
+   cd Skelton.AppHost
+   dotnet user-secrets set "OLLAMA_API_URL" "http://host.docker.internal:11434"
+
+   # Option 2: Use host's IP address
+   dotnet user-secrets set "OLLAMA_API_URL" "http://192.168.1.100:11434"
+   ```
+
+3. **OLLAMA running on different port**:
+   ```bash
+   cd Skelton.AppHost
+   dotnet user-secrets set "OLLAMA_API_URL" "http://localhost:YOUR_PORT"
+   ```
 
 ## Additional Resources
 
